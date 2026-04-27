@@ -12,6 +12,7 @@ import {
   Bar,
 } from 'recharts';
 import type { Transaction } from '../types/finance';
+import { getCurrentMonthLocalISO, shiftMonthLocalISO } from '../utils/date';
 
 interface AdvancedChartsProps {
   transactions: Transaction[];
@@ -29,6 +30,18 @@ interface YearComparison {
   month: string;
   currentYear: number;
   previousYear: number;
+}
+
+interface TooltipEntry {
+  color: string;
+  name: string;
+  value: number;
+}
+
+interface ChartTooltipProps {
+  active?: boolean;
+  payload?: TooltipEntry[];
+  label?: string;
 }
 
 export function AdvancedCharts({ transactions }: AdvancedChartsProps) {
@@ -52,19 +65,21 @@ export function AdvancedCharts({ transactions }: AdvancedChartsProps) {
 
     // Sort and calculate cumulative
     const sorted = Array.from(monthlyMap.entries()).sort((a, b) => a[0].localeCompare(b[0]));
-    let cumulative = 0;
-    
-    return sorted.map(([month, data]) => {
+
+    return sorted.reduce<MonthlyBalance[]>((result, [month, data]) => {
       const balance = data.income - data.expense;
-      cumulative += balance;
-      return {
+      const previousCumulative = result[result.length - 1]?.cumulative ?? 0;
+
+      result.push({
         month,
         balance,
         income: data.income,
         expense: data.expense,
-        cumulative,
-      };
-    });
+        cumulative: previousCumulative + balance,
+      });
+
+      return result;
+    }, []);
   }, [transactions]);
 
   // Year over year comparison
@@ -102,8 +117,8 @@ export function AdvancedCharts({ transactions }: AdvancedChartsProps) {
   const insights = useMemo(() => {
     if (transactions.length === 0) return null;
 
-    const currentMonth = new Date().toISOString().substring(0, 7);
-    const previousMonth = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().substring(0, 7);
+    const currentMonth = getCurrentMonthLocalISO();
+    const previousMonth = shiftMonthLocalISO(currentMonth, -1);
 
     const currentMonthTransactions = transactions.filter(t => t.date.startsWith(currentMonth));
     const previousMonthTransactions = transactions.filter(t => t.date.startsWith(previousMonth));
@@ -156,12 +171,12 @@ export function AdvancedCharts({ transactions }: AdvancedChartsProps) {
     return `${monthNum}/${year}`;
   };
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload, label }: ChartTooltipProps) => {
     if (active && payload && payload.length) {
       return (
         <div className="rounded-xl p-4 shadow-xl" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}>
-          <p className="font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>{formatMonth(label)}</p>
-          {payload.map((entry: any, index: number) => (
+          <p className="font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>{formatMonth(label ?? '')}</p>
+          {payload.map((entry, index: number) => (
             <p key={index} className="text-sm" style={{ color: entry.color }}>
               {entry.name}: {new Intl.NumberFormat('pt-BR', {
                 style: 'currency',

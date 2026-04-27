@@ -6,14 +6,19 @@ import type {
   MonthlyData, 
   Goal, 
   Account, 
-  RecurringTransaction 
+  RecurringTransaction,
+  Budget,
+  BudgetStatus
 } from '../types/finance';
+import type { FinanceBackupData } from '../types/backup';
+import { getTodayLocalISO } from '../utils/date';
 
 const TRANSACTIONS_KEY = 'financas_transactions';
 const CATEGORIES_KEY = 'financas_categories';
 const GOALS_KEY = 'financas_goals';
 const ACCOUNTS_KEY = 'financas_accounts';
 const RECURRING_KEY = 'financas_recurring';
+const BUDGETS_KEY = 'financas_budgets';
 
 const defaultCategories: Category[] = [
   { id: '1', name: 'Salário', type: 'income', color: '#22c55e', icon: 'wallet' },
@@ -32,30 +37,25 @@ const defaultAccounts: Account[] = [
   { id: '1', name: 'Conta Principal', type: 'checking', balance: 0, color: '#6366f1', icon: 'wallet', isDefault: true },
 ];
 
-export function useFinance() {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [categories, setCategories] = useState<Category[]>(defaultCategories);
-  const [goals, setGoals] = useState<Goal[]>([]);
-  const [accounts, setAccounts] = useState<Account[]>(defaultAccounts);
-  const [recurring, setRecurring] = useState<RecurringTransaction[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
+function readStoredValue<T>(key: string, fallback: T): T {
+  const stored = localStorage.getItem(key);
+  if (!stored) return fallback;
 
-  // Load data from localStorage
-  useEffect(() => {
-    const storedTransactions = localStorage.getItem(TRANSACTIONS_KEY);
-    const storedCategories = localStorage.getItem(CATEGORIES_KEY);
-    const storedGoals = localStorage.getItem(GOALS_KEY);
-    const storedAccounts = localStorage.getItem(ACCOUNTS_KEY);
-    const storedRecurring = localStorage.getItem(RECURRING_KEY);
-    
-    if (storedTransactions) setTransactions(JSON.parse(storedTransactions));
-    if (storedCategories) setCategories(JSON.parse(storedCategories));
-    if (storedGoals) setGoals(JSON.parse(storedGoals));
-    if (storedAccounts) setAccounts(JSON.parse(storedAccounts));
-    if (storedRecurring) setRecurring(JSON.parse(storedRecurring));
-    
-    setIsLoaded(true);
-  }, []);
+  try {
+    return JSON.parse(stored) as T;
+  } catch {
+    return fallback;
+  }
+}
+
+export function useFinance() {
+  const [transactions, setTransactions] = useState<Transaction[]>(() => readStoredValue(TRANSACTIONS_KEY, []));
+  const [categories, setCategories] = useState<Category[]>(() => readStoredValue(CATEGORIES_KEY, defaultCategories));
+  const [goals, setGoals] = useState<Goal[]>(() => readStoredValue(GOALS_KEY, []));
+  const [accounts, setAccounts] = useState<Account[]>(() => readStoredValue(ACCOUNTS_KEY, defaultAccounts));
+  const [recurring, setRecurring] = useState<RecurringTransaction[]>(() => readStoredValue(RECURRING_KEY, []));
+  const [budgets, setBudgets] = useState<Budget[]>(() => readStoredValue(BUDGETS_KEY, []));
+  const [isLoaded] = useState(true);
 
   // Save to localStorage whenever data changes
   useEffect(() => {
@@ -78,11 +78,15 @@ export function useFinance() {
     if (isLoaded) localStorage.setItem(RECURRING_KEY, JSON.stringify(recurring));
   }, [recurring, isLoaded]);
 
+  useEffect(() => {
+    if (isLoaded) localStorage.setItem(BUDGETS_KEY, JSON.stringify(budgets));
+  }, [budgets, isLoaded]);
+
   // Process recurring transactions
   useEffect(() => {
     if (!isLoaded) return;
 
-    const today = new Date().toISOString().split('T')[0];
+    const today = getTodayLocalISO();
     
     recurring.forEach(rec => {
       if (!rec.isActive) return;
@@ -140,7 +144,13 @@ export function useFinance() {
   }, []);
 
   const deleteTransaction = useCallback((id: string) => {
-    setTransactions(prev => prev.filter(t => t.id !== id));
+    setTransactions(prev => {
+      const transaction = prev.find(t => t.id === id);
+      if (transaction?.isTransfer && transaction.transferId) {
+        return prev.filter(t => t.transferId !== transaction.transferId);
+      }
+      return prev.filter(t => t.id !== id);
+    });
   }, []);
 
   const updateTransaction = useCallback((id: string, updates: Partial<Transaction>) => {
@@ -192,6 +202,23 @@ export function useFinance() {
     setAccounts(prev => prev.filter(a => a.id !== id));
   }, []);
 
+  const reassignAccountReferences = useCallback((fromAccountId: string, toAccountId: string) => {
+    setTransactions(prev =>
+      prev.map((transaction) =>
+        transaction.accountId === fromAccountId
+          ? { ...transaction, accountId: toAccountId }
+          : transaction
+      )
+    );
+    setRecurring(prev =>
+      prev.map((item) =>
+        item.accountId === fromAccountId
+          ? { ...item, accountId: toAccountId }
+          : item
+      )
+    );
+  }, []);
+
   // Recurring
   const addRecurring = useCallback((rec: Omit<RecurringTransaction, 'id'>) => {
     const newRecurring: RecurringTransaction = { ...rec, id: crypto.randomUUID() };
@@ -206,13 +233,73 @@ export function useFinance() {
     setRecurring(prev => prev.filter(r => r.id !== id));
   }, []);
 
+  const transferBetweenAccounts = useCallback((data: {
+    fromAccountId: string;
+    toAccountId: string;
+    amount: number;
+    date?: string;
+    description?: string;
+  }) => {
+    const date = data.date || getTodayLocalISO();
+    const transferId = crypto.randomUUID();
+    const baseDescription = data.description?.trim() || 'Transferencia entre contas';
+
+    const outgoing: Transaction = {
+      id: crypto.randomUUID(),
+      description: baseDescription,
+      amount: data.amount,
+      type: 'expense',
+      category: 'Transferencia interna',
+      date,
+      createdAt: new Date().toISOString(),
+      accountId: data.fromAccountId,
+      isTransfer: true,
+      transferId,
+      transferDirection: 'out',
+    };
+
+    const incoming: Transaction = {
+      id: crypto.randomUUID(),
+      description: baseDescription,
+      amount: data.amount,
+      type: 'income',
+      category: 'Transferencia interna',
+      date,
+      createdAt: new Date().toISOString(),
+      accountId: data.toAccountId,
+      isTransfer: true,
+      transferId,
+      transferDirection: 'in',
+    };
+
+    setTransactions(prev => [incoming, outgoing, ...prev]);
+  }, []);
+
+  // Budgets
+  const addBudget = useCallback((budget: Omit<Budget, 'id' | 'createdAt'>) => {
+    const newBudget: Budget = {
+      ...budget,
+      id: crypto.randomUUID(),
+      createdAt: new Date().toISOString(),
+    };
+    setBudgets(prev => [...prev.filter(b => !(b.category === budget.category && b.month === budget.month)), newBudget]);
+  }, []);
+
+  const updateBudget = useCallback((id: string, updates: Partial<Budget>) => {
+    setBudgets(prev => prev.map(b => b.id === id ? { ...b, ...updates } : b));
+  }, []);
+
+  const deleteBudget = useCallback((id: string) => {
+    setBudgets(prev => prev.filter(b => b.id !== id));
+  }, []);
+
   const getSummary = useCallback((): FinancialSummary => {
     const totalIncome = transactions
-      .filter(t => t.type === 'income')
+      .filter(t => t.type === 'income' && !t.isTransfer)
       .reduce((sum, t) => sum + t.amount, 0);
     
     const totalExpense = transactions
-      .filter(t => t.type === 'expense')
+      .filter(t => t.type === 'expense' && !t.isTransfer)
       .reduce((sum, t) => sum + t.amount, 0);
 
     return {
@@ -226,7 +313,7 @@ export function useFinance() {
   const getMonthlyData = useCallback((): MonthlyData[] => {
     const monthlyMap = new Map<string, { income: number; expense: number }>();
 
-    transactions.forEach(transaction => {
+    transactions.filter(transaction => !transaction.isTransfer).forEach(transaction => {
       const month = transaction.date.substring(0, 7);
       const current = monthlyMap.get(month) || { income: 0, expense: 0 };
       
@@ -254,7 +341,7 @@ export function useFinance() {
     const categoryMap = new Map<string, number>();
 
     transactions
-      .filter(t => t.type === type)
+      .filter(t => t.type === type && !t.isTransfer)
       .forEach(transaction => {
         const current = categoryMap.get(transaction.category) || 0;
         categoryMap.set(transaction.category, current + transaction.amount);
@@ -275,12 +362,45 @@ export function useFinance() {
       .reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
   }, [transactions]);
 
+  const getBudgetStatus = useCallback((month: string): BudgetStatus[] => {
+    const monthBudgets = budgets.filter(b => b.month === month);
+
+    return monthBudgets
+      .map((budget) => {
+        const spent = transactions
+          .filter(t => t.type === 'expense' && t.category === budget.category && t.date.startsWith(month))
+          .reduce((sum, t) => sum + t.amount, 0);
+
+        const remaining = budget.amount - spent;
+        const percentage = budget.amount > 0 ? (spent / budget.amount) * 100 : 0;
+
+        return {
+          budget,
+          spent,
+          remaining,
+          percentage,
+          isExceeded: spent > budget.amount,
+        };
+      })
+      .sort((a, b) => b.percentage - a.percentage);
+  }, [budgets, transactions]);
+
+  const replaceAllData = useCallback((data: FinanceBackupData) => {
+    setTransactions(data.transactions);
+    setCategories(data.categories.length > 0 ? data.categories : defaultCategories);
+    setGoals(data.goals);
+    setAccounts(data.accounts.length > 0 ? data.accounts : defaultAccounts);
+    setRecurring(data.recurring);
+    setBudgets(data.budgets);
+  }, []);
+
   return {
     transactions,
     categories,
     goals,
     accounts,
     recurring,
+    budgets,
     isLoaded,
     addTransaction,
     deleteTransaction,
@@ -292,13 +412,20 @@ export function useFinance() {
     addAccount,
     updateAccount,
     deleteAccount,
+    reassignAccountReferences,
     addRecurring,
     updateRecurring,
     deleteRecurring,
+    transferBetweenAccounts,
+    addBudget,
+    updateBudget,
+    deleteBudget,
     getSummary,
     getMonthlyData,
     getCategoryData,
     getTransactionsByMonth,
     getAccountBalance,
+    getBudgetStatus,
+    replaceAllData,
   };
 }

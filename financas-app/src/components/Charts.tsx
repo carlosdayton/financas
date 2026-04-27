@@ -28,12 +28,24 @@ const COLORS = [
   '#10b981', '#06b6d4', '#3b82f6', '#6366f1',
 ];
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+interface TooltipEntry {
+  color: string;
+  name: string;
+  value: number;
+}
+
+interface ChartTooltipProps {
+  active?: boolean;
+  payload?: TooltipEntry[];
+  label?: string;
+}
+
+const CustomTooltip = ({ active, payload, label }: ChartTooltipProps) => {
   if (active && payload && payload.length) {
     return (
       <div className="rounded-xl p-4 shadow-xl" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}>
         <p className="font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>{label}</p>
-        {payload.map((entry: any, index: number) => (
+        {payload.map((entry, index: number) => (
           <p key={index} className="text-sm" style={{ color: entry.color }}>
             {entry.name}: {new Intl.NumberFormat('pt-BR', {
               style: 'currency',

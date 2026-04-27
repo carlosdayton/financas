@@ -4,10 +4,12 @@ import {
   Receipt, 
   Target, 
   BarChart3, 
-  Repeat
+  Repeat,
+  CreditCard,
+  PiggyBank
 } from 'lucide-react';
 
-export type Tab = 'dashboard' | 'transactions' | 'accounts' | 'goals' | 'analytics' | 'recurring';
+export type Tab = 'dashboard' | 'transactions' | 'accounts' | 'goals' | 'analytics' | 'recurring' | 'installments' | 'budgets';
 
 interface SidebarProps {
   activeTab: Tab;
@@ -18,6 +20,8 @@ const menuItems = [
   { id: 'dashboard' as Tab, label: 'Dashboard', icon: LayoutDashboard },
   { id: 'transactions' as Tab, label: 'Transações', icon: Receipt },
   { id: 'accounts' as Tab, label: 'Contas', icon: Wallet },
+  { id: 'budgets' as Tab, label: 'Orçamentos', icon: PiggyBank },
+  { id: 'installments' as Tab, label: 'Parcelamentos', icon: CreditCard },
   { id: 'goals' as Tab, label: 'Metas', icon: Target },
   { id: 'recurring' as Tab, label: 'Recorrentes', icon: Repeat },
   { id: 'analytics' as Tab, label: 'Análises', icon: BarChart3 },
@@ -56,11 +60,9 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                     isActive
                       ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg shadow-indigo-500/25'
-                      : 'hover:text-white'
+                      : 'hover:text-white hover:bg-[var(--bg-tertiary)]'
                   }`}
-                  style={!isActive ? { color: 'var(--text-secondary)' } : undefined}
-                  onMouseEnter={(e) => !isActive && (e.currentTarget.style.backgroundColor = 'var(--bg-tertiary)')}
-                  onMouseLeave={(e) => !isActive && (e.currentTarget.style.backgroundColor = 'transparent')}
+                  style={!isActive ? { color: 'var(--text-secondary)', backgroundColor: 'transparent' } : undefined}
                 >
                   <Icon className={`w-5 h-5 ${isActive ? 'text-white' : ''}`} />
                   <span className="font-medium">{item.label}</span>

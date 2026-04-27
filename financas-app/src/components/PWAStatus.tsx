@@ -1,6 +1,6 @@
 import { usePWA, useNetworkStatus } from '../hooks/usePWA';
 import { Download, WifiOff, RefreshCw, CheckCircle2, X } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 export function PWAInstallPrompt() {
   const { canInstall, install, isInstalled } = usePWA();
@@ -64,17 +64,7 @@ export function PWAInstallPrompt() {
 
 export function OfflineIndicator() {
   const isOnline = useNetworkStatus();
-  const [show, setShow] = useState(false);
-
-  useEffect(() => {
-    if (!isOnline) {
-      setShow(true);
-    } else {
-      // Hide after 3 seconds when back online
-      const timer = setTimeout(() => setShow(false), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [isOnline]);
+  const show = !isOnline;
 
   if (!show) return null;
 
@@ -155,18 +145,20 @@ export function UpdatePrompt() {
   );
 }
 
-// Add animation styles
-const style = document.createElement('style');
-style.textContent = `
-  @keyframes slideUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
+if (typeof document !== 'undefined' && !document.getElementById('pwa-status-styles')) {
+  const style = document.createElement('style');
+  style.id = 'pwa-status-styles';
+  style.textContent = `
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-`;
-document.head.appendChild(style);
+  `;
+  document.head.appendChild(style);
+}

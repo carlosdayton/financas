@@ -8,6 +8,13 @@ interface AccountsPageProps {
   onAddAccount: (account: Omit<Account, 'id'>) => void;
   onDeleteAccount: (id: string) => void;
   onSelectAccount: (id: string | null) => void;
+  onTransferBetweenAccounts: (data: {
+    fromAccountId: string;
+    toAccountId: string;
+    amount: number;
+    date?: string;
+    description?: string;
+  }) => void;
 }
 
 export function AccountsPage({
@@ -17,6 +24,7 @@ export function AccountsPage({
   onAddAccount,
   onDeleteAccount,
   onSelectAccount,
+  onTransferBetweenAccounts,
 }: AccountsPageProps) {
   return (
     <div className="space-y-6">
@@ -32,6 +40,7 @@ export function AccountsPage({
         onDeleteAccount={onDeleteAccount}
         selectedAccount={selectedAccount}
         onSelectAccount={onSelectAccount}
+        onTransferBetweenAccounts={onTransferBetweenAccounts}
       />
     </div>
   );

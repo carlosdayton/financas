@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Wallet, Plus, Trash2, CreditCard, PiggyBank, Banknote, TrendingUp, Landmark } from 'lucide-react';
+import { Wallet, Plus, Trash2, CreditCard, PiggyBank, Banknote, TrendingUp, Landmark, ArrowRightLeft } from 'lucide-react';
 import type { Account } from '../types/finance';
+import { getTodayLocalISO } from '../utils/date';
 
 interface AccountsProps {
   accounts: Account[];
@@ -9,6 +10,13 @@ interface AccountsProps {
   onDeleteAccount: (id: string) => void;
   selectedAccount: string | null;
   onSelectAccount: (id: string | null) => void;
+  onTransferBetweenAccounts: (data: {
+    fromAccountId: string;
+    toAccountId: string;
+    amount: number;
+    date?: string;
+    description?: string;
+  }) => void;
 }
 
 const ACCOUNT_TYPES = [
@@ -28,8 +36,15 @@ const ACCOUNT_COLORS = [
   { name: 'Violet', value: '#8b5cf6' },
 ];
 
-export function Accounts({ accounts, accountBalances, onAddAccount, onDeleteAccount, selectedAccount, onSelectAccount }: AccountsProps) {
+export function Accounts({ accounts, accountBalances, onAddAccount, onDeleteAccount, selectedAccount, onSelectAccount, onTransferBetweenAccounts }: AccountsProps) {
   const [isAdding, setIsAdding] = useState(false);
+  const [transfer, setTransfer] = useState({
+    fromAccountId: accounts[0]?.id ?? '',
+    toAccountId: accounts[1]?.id ?? '',
+    amount: '',
+    description: '',
+    date: getTodayLocalISO(),
+  });
   const [newAccount, setNewAccount] = useState({
     name: '',
     type: 'checking' as Account['type'],
@@ -66,6 +81,29 @@ export function Accounts({ accounts, accountBalances, onAddAccount, onDeleteAcco
   };
 
   const totalBalance = Object.values(accountBalances).reduce((sum, balance) => sum + balance, 0);
+
+  const handleTransfer = (e: React.FormEvent) => {
+    e.preventDefault();
+    const amount = parseFloat(transfer.amount);
+
+    if (!transfer.fromAccountId || !transfer.toAccountId || transfer.fromAccountId === transfer.toAccountId || !(amount > 0)) {
+      return;
+    }
+
+    onTransferBetweenAccounts({
+      fromAccountId: transfer.fromAccountId,
+      toAccountId: transfer.toAccountId,
+      amount,
+      description: transfer.description,
+      date: transfer.date,
+    });
+
+    setTransfer(prev => ({
+      ...prev,
+      amount: '',
+      description: '',
+    }));
+  };
 
   return (
     <div className="relative mb-8">
@@ -152,6 +190,87 @@ export function Accounts({ accounts, accountBalances, onAddAccount, onDeleteAcco
                 className="px-4 py-2 bg-[#1a1a2e] text-[#a0a0b8] rounded-xl hover:text-white transition-all"
               >
                 Cancelar
+              </button>
+            </div>
+          </form>
+        )}
+
+        {accounts.length >= 2 && (
+          <form onSubmit={handleTransfer} className="mb-6 p-4 rounded-xl space-y-4" style={{ background: 'var(--bg-tertiary)' }}>
+            <div className="flex items-center gap-2">
+              <ArrowRightLeft className="w-4 h-4 text-indigo-400" />
+              <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Transferencia entre contas</h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Origem</label>
+                <select
+                  value={transfer.fromAccountId}
+                  onChange={(e) => setTransfer({ ...transfer, fromAccountId: e.target.value })}
+                  className="w-full px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                  style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
+                  required
+                >
+                  {accounts.map((account) => (
+                    <option key={account.id} value={account.id}>{account.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Destino</label>
+                <select
+                  value={transfer.toAccountId}
+                  onChange={(e) => setTransfer({ ...transfer, toAccountId: e.target.value })}
+                  className="w-full px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                  style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
+                  required
+                >
+                  {accounts.map((account) => (
+                    <option key={account.id} value={account.id}>{account.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Valor</label>
+                <input
+                  type="number"
+                  min="0.01"
+                  step="0.01"
+                  value={transfer.amount}
+                  onChange={(e) => setTransfer({ ...transfer, amount: e.target.value })}
+                  placeholder="0,00"
+                  className="w-full px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                  style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Data</label>
+                <input
+                  type="date"
+                  value={transfer.date}
+                  onChange={(e) => setTransfer({ ...transfer, date: e.target.value })}
+                  className="w-full px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                  style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
+                  required
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-3">
+              <input
+                type="text"
+                value={transfer.description}
+                onChange={(e) => setTransfer({ ...transfer, description: e.target.value })}
+                placeholder="Descricao (opcional)"
+                className="w-full px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
+              />
+              <button
+                type="submit"
+                disabled={transfer.fromAccountId === transfer.toAccountId}
+                className="px-5 py-2 bg-indigo-500 hover:bg-indigo-400 text-white rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Transferir
               </button>
             </div>
           </form>

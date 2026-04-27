@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { PlusCircle, ArrowDownCircle, ArrowUpCircle } from 'lucide-react';
 import type { TransactionType } from '../types/finance';
+import { getTodayLocalISO } from '../utils/date';
 
 interface TransactionFormProps {
   categories: { id: string; name: string; type: TransactionType }[];
@@ -18,7 +19,7 @@ export function TransactionForm({ categories, onSubmit }: TransactionFormProps) 
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('');
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState(getTodayLocalISO());
 
   const filteredCategories = categories.filter(c => c.type === type);
 

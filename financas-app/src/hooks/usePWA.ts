@@ -13,36 +13,45 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
+interface NavigatorWithStandalone extends Navigator {
+  standalone?: boolean;
+}
+
+interface ServiceWorkerMessageEvent extends Omit<MessageEvent, 'data'> {
+  data?: {
+    type?: string;
+  };
+}
+
+interface SyncManagerRegistration extends ServiceWorkerRegistration {
+  sync?: {
+    register(tag: string): Promise<void>;
+  };
+}
+
 export function usePWA() {
-  const [state, setState] = useState<PWAState>({
-    isInstalled: false,
-    isStandalone: false,
-    canInstall: false,
-    isOffline: !navigator.onLine,
-    updateAvailable: false,
+  const [state, setState] = useState<PWAState>(() => {
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+      (window.navigator as NavigatorWithStandalone).standalone === true;
+
+    return {
+      isInstalled: isStandalone,
+      isStandalone,
+      canInstall: false,
+      isOffline: !navigator.onLine,
+      updateAvailable: false,
+    };
   });
 
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
 
   useEffect(() => {
-    // Check if app is already installed
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
-                        (window.navigator as any).standalone === true;
-    
-    setState(prev => ({
-      ...prev,
-      isStandalone,
-      isInstalled: isStandalone,
-    }));
-
-    // Listen for beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
       setState(prev => ({ ...prev, canInstall: true }));
     };
 
-    // Listen for app installed event
     const handleAppInstalled = () => {
       setDeferredPrompt(null);
       setState(prev => ({
@@ -52,7 +61,6 @@ export function usePWA() {
       }));
     };
 
-    // Listen for online/offline events
     const handleOnline = () => {
       setState(prev => ({ ...prev, isOffline: false }));
     };
@@ -61,9 +69,15 @@ export function usePWA() {
       setState(prev => ({ ...prev, isOffline: true }));
     };
 
-    // Listen for service worker updates
     const handleServiceWorkerUpdate = () => {
       setState(prev => ({ ...prev, updateAvailable: true }));
+    };
+
+    const handleServiceWorkerMessage = (event: Event) => {
+      const messageEvent = event as ServiceWorkerMessageEvent;
+      if (messageEvent.data?.type === 'UPDATE_AVAILABLE') {
+        handleServiceWorkerUpdate();
+      }
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -71,18 +85,14 @@ export function usePWA() {
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
-    // Listen for service worker messages
-    navigator.serviceWorker?.addEventListener('message', (event) => {
-      if (event.data?.type === 'UPDATE_AVAILABLE') {
-        handleServiceWorkerUpdate();
-      }
-    });
+    navigator.serviceWorker?.addEventListener('message', handleServiceWorkerMessage);
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       window.removeEventListener('appinstalled', handleAppInstalled);
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
+      navigator.serviceWorker?.removeEventListener('message', handleServiceWorkerMessage);
     };
   }, []);
 
@@ -144,8 +154,9 @@ export function useSyncWhenOnline() {
     if (isOnline && 'serviceWorker' in navigator) {
       // Trigger background sync when coming back online
       navigator.serviceWorker.ready.then((registration) => {
-        if ('sync' in registration) {
-          (registration as any).sync.register('sync-transactions').catch((err: Error) => {
+        const registrationWithSync = registration as SyncManagerRegistration;
+        if (registrationWithSync.sync) {
+          registrationWithSync.sync.register('sync-transactions').catch((err: Error) => {
             console.log('Background sync failed:', err);
           });
         }

@@ -5,27 +5,21 @@ type Theme = 'dark' | 'light';
 const THEME_KEY = 'financas_theme';
 
 export function useTheme() {
-  const [theme, setTheme] = useState<Theme>('dark');
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  useEffect(() => {
+  const [theme, setTheme] = useState<Theme>(() => {
     const stored = localStorage.getItem(THEME_KEY) as Theme | null;
     if (stored) {
-      setTheme(stored);
-    } else {
-      // Check system preference
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      setTheme(prefersDark ? 'dark' : 'light');
+      return stored;
     }
-    setIsLoaded(true);
-  }, []);
+
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    return prefersDark ? 'dark' : 'light';
+  });
+  const isLoaded = true;
 
   useEffect(() => {
-    if (isLoaded) {
-      localStorage.setItem(THEME_KEY, theme);
-      document.documentElement.setAttribute('data-theme', theme);
-    }
-  }, [theme, isLoaded]);
+    localStorage.setItem(THEME_KEY, theme);
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
 
   const toggleTheme = useCallback(() => {
     setTheme(prev => prev === 'dark' ? 'light' : 'dark');

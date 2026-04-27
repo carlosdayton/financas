@@ -11,6 +11,9 @@ export interface Transaction {
   accountId?: string;
   isRecurring?: boolean;
   recurringId?: string;
+  isTransfer?: boolean;
+  transferId?: string;
+  transferDirection?: 'in' | 'out';
 }
 
 export interface Category {
@@ -67,4 +70,44 @@ export interface RecurringTransaction {
   lastGenerated?: string;
   accountId?: string;
   isActive: boolean;
+}
+
+export interface Installment {
+  id: string;
+  description: string;
+  totalAmount: number;
+  installmentAmount: number;
+  totalInstallments: number;
+  paidInstallments: number;
+  startDate: string;
+  category: string;
+  accountId?: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface InstallmentPayment {
+  id: string;
+  installmentId: string;
+  installmentNumber: number;
+  amount: number;
+  dueDate: string;
+  paidDate?: string;
+  isPaid: boolean;
+}
+
+export interface Budget {
+  id: string;
+  category: string;
+  amount: number;
+  month: string;
+  createdAt: string;
+}
+
+export interface BudgetStatus {
+  budget: Budget;
+  spent: number;
+  remaining: number;
+  percentage: number;
+  isExceeded: boolean;
 }

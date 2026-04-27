@@ -61,11 +61,6 @@ export function Goals({ goals, onAddGoal, onDeleteGoal, onContribute }: GoalsPro
     }).format(value);
   };
 
-  const formatDate = (dateStr: string) => {
-    void formatDate; // Mark as used
-    return new Date(dateStr).toLocaleDateString('pt-BR');
-  };
-
   const getDaysRemaining = (deadline: string) => {
     const days = Math.ceil((new Date(deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
     return days > 0 ? days : 0;
