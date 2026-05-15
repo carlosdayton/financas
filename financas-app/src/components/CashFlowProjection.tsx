@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { TrendingUp } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import type { ValueType } from 'recharts/types/component/DefaultTooltipContent';
 import type { Transaction, RecurringTransaction, Installment, InstallmentPayment } from '../types/finance';
 import { getCurrentMonthLocalISO, shiftMonthLocalISO } from '../utils/date';
 
@@ -102,7 +103,7 @@ export function CashFlowProjection({ transactions, recurring, installments, paym
             width={80}
           />
           <Tooltip
-            formatter={(v: number | string | undefined) => [fmt(Number(v ?? 0)), 'Saldo Projetado']}
+            formatter={(v: ValueType) => [fmt(Number(Array.isArray(v) ? v[0] : v ?? 0)), 'Saldo Projetado']}
             contentStyle={{
               background: 'var(--bg-secondary)',
               border: '1px solid var(--border-color)',
