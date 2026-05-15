@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc *)",
+      "Bash(python3)",
+      "Bash(python3 -c ' *)",
+      "Bash(grep -v \"^[0-9]*:\\\\s*//\")",
+      "Bash(npx --prefix .. tsc --noEmit)",
+      "Bash(npm run *)",
+      "Bash(tsc --noEmit)",
+      "Bash(tsc --noEmit src/components/CashFlowProjection.tsx)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(cat financas-app/vercel.json)",
+      "Bash(cat vercel.json)",
+      "Bash(git commit -m 'fix\\(ts\\): CashFlowProjection formatter aceita ValueType | undefined *)",
+      "Bash(git commit -m 'fix\\(ts\\): formatter cobre undefined em CashFlowProjection *)",
+      "Bash(git commit -m 'fix\\(ts\\): usa ValueType do recharts no formatter de CashFlowProjection *)",
+      "Bash(git commit -m 'fix: remove CashFlowProjection de AnalyticsPage *)",
+      "Bash(rm financas-app/src/components/CashFlowProjection.tsx)",
+      "Bash(git commit -m 'fix: deleta CashFlowProjection.tsx *)"
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "powershell -ExecutionPolicy Bypass -File \"C:\\Users\\Carlos Dayton\\.claude\\plugins\\cache\\caveman\\caveman\\63a91ecadbf4\\src\\hooks\\caveman-statusline.ps1\""
+  }
+}
