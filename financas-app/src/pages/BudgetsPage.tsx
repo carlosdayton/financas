@@ -26,11 +26,6 @@ export function BudgetsPage({
 }: BudgetsPageProps) {
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-white">Orcamentos</h2>
-        <p className="text-[#a0a0b8]">Defina limites mensais por categoria</p>
-      </div>
-
       <Budgets
         categories={categories}
         budgets={budgets}

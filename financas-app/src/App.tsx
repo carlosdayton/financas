@@ -1,18 +1,21 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useFinance } from './hooks/useFinance';
 import { useToast } from './hooks/useToast';
 import { useTheme } from './hooks/useTheme';
 import { useSyncWhenOnline } from './hooks/usePWA';
 import { useInstallments } from './hooks/useInstallments';
 import { useAuth } from './hooks/useAuth';
+import { PrivacyProvider } from './contexts/PrivacyContext';
 import { Sidebar, type Tab } from './components/Sidebar';
 import { ConfirmModal } from './components/ConfirmModal';
 import { ToastContainer } from './components/Toast';
 import { DataExport } from './components/DataExport';
 import { ThemeToggle } from './components/ThemeToggle';
+import { PrivacyToggle } from './components/PrivacyToggle';
 import { PWAInstallPrompt, OfflineIndicator, UpdatePrompt } from './components/PWAStatus';
 import { PinLock } from './components/PinLock';
 import type { AlertPreferencesState } from './components/AlertPreferences';
+import { CommandPalette } from './components/CommandPalette';
 import { DashboardPage } from './pages/DashboardPage';
 import { TransactionsPage } from './pages/TransactionsPage';
 import { AccountsPage } from './pages/AccountsPage';
@@ -21,6 +24,8 @@ import { RecurringPage } from './pages/RecurringPage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
 import { InstallmentsPage } from './pages/InstallmentsPage';
 import { BudgetsPage } from './pages/BudgetsPage';
+import { CategoriesPage } from './pages/CategoriesPage';
+import { CreditCardPage } from './pages/CreditCardPage';
 import type { Transaction } from './types/finance';
 import type { AppBackupData, LegacyTransactionsBackupData } from './types/backup';
 import { getCurrentMonthLocalISO, shiftMonthLocalISO } from './utils/date';
@@ -33,7 +38,7 @@ const defaultAlertPreferences: AlertPreferencesState = {
   negativeBalance: true,
 };
 
-function App() {
+function AppInner() {
   const {
     transactions,
     categories,
@@ -44,6 +49,10 @@ function App() {
     isLoaded,
     addTransaction,
     deleteTransaction,
+    updateTransaction,
+    addCategory,
+    updateCategory,
+    deleteCategory,
     addGoal,
     updateGoal,
     deleteGoal,
@@ -96,6 +105,7 @@ function App() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [transactionToDelete, setTransactionToDelete] = useState<string | null>(null);
   const [selectedAccount, setSelectedAccount] = useState<string | null>(null);
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [alertPreferences, setAlertPreferences] = useState<AlertPreferencesState>(() => {
     const stored = localStorage.getItem(ALERT_PREFERENCES_KEY);
     if (!stored) return defaultAlertPreferences;
@@ -106,6 +116,7 @@ function App() {
     }
   });
 
+  // ââ€â‚¬ââ€â‚¬ Derived data ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬
   const summary = useMemo(
     () => (isLoaded ? getSummary() : { totalIncome: 0, totalExpense: 0, balance: 0, transactionsCount: 0 }),
     [isLoaded, getSummary]
@@ -120,6 +131,7 @@ function App() {
   );
   const currentMonth = useMemo(() => getCurrentMonthLocalISO(), []);
   const [selectedBudgetMonth, setSelectedBudgetMonth] = useState(currentMonth);
+
   const currentMonthBudgetStatus = useMemo(
     () => (isLoaded ? getBudgetStatus(currentMonth) : []),
     [isLoaded, getBudgetStatus, currentMonth]
@@ -131,12 +143,10 @@ function App() {
   const currentMonthBalance = useMemo(
     () =>
       transactions
-        .filter((transaction) => transaction.date.startsWith(currentMonth) && !transaction.isTransfer)
-        .reduce((sum, transaction) => sum + (transaction.type === 'income' ? transaction.amount : -transaction.amount), 0),
+        .filter((t) => t.date.startsWith(currentMonth) && !t.isTransfer)
+        .reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0),
     [transactions, currentMonth]
   );
-  const budgetAlertLevelRef = useRef<Record<string, 'none' | 'warning' | 'exceeded'>>({});
-  const monthBalanceAlertedRef = useRef(false);
 
   const accountBalances = useMemo(() => {
     if (!isLoaded) return {};
@@ -147,231 +157,257 @@ function App() {
     return balances;
   }, [isLoaded, accounts, getAccountBalance]);
 
+  // Sidebar alert counts
+  const sidebarAlerts = useMemo(() => {
+    const exceededBudgets = currentMonthBudgetStatus.filter((b) => b.isExceeded).length;
+    const creditAccounts = accounts.filter((a) => a.type === 'credit');
+    const unpaidInvoices = creditAccounts.filter((acc) => {
+      const monthExpenses = transactions.filter(
+        (t) => t.accountId === acc.id && t.type === 'expense' && !t.isTransfer && t.date.startsWith(currentMonth)
+      );
+      const isPaid = transactions.some(
+        (t) => t.accountId === acc.id && t.type === 'income' && t.isTransfer && t.date.startsWith(currentMonth) && t.category === 'Fatura Cartão'
+      );
+      return monthExpenses.length > 0 && !isPaid;
+    }).length;
+
+    return { budgets: exceededBudgets, creditcard: unpaidInvoices };
+  }, [currentMonthBudgetStatus, accounts, transactions, currentMonth]);
+
   const backupData = useMemo<AppBackupData>(
     () => ({
       version: '2.0',
       exportDate: new Date().toISOString(),
-      finance: {
-        transactions,
-        categories,
-        goals,
-        accounts,
-        recurring,
-        budgets,
-      },
-      installments: {
-        installments,
-        payments,
-      },
-      preferences: {
-        alertPreferences,
-        theme: isDark ? 'dark' : 'light',
-      },
+      finance: { transactions, categories, goals, accounts, recurring, budgets },
+      installments: { installments, payments },
+      preferences: { alertPreferences, theme: isDark ? 'dark' : 'light' },
     }),
-    [
-      transactions,
-      categories,
-      goals,
-      accounts,
-      recurring,
-      budgets,
-      installments,
-      payments,
-      alertPreferences,
-      isDark,
-    ]
+    [transactions, categories, goals, accounts, recurring, budgets, installments, payments, alertPreferences, isDark]
   );
 
+  // ââ€â‚¬ââ€â‚¬ Side effects ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬
   useEffect(() => {
     localStorage.setItem(ALERT_PREFERENCES_KEY, JSON.stringify(alertPreferences));
   }, [alertPreferences]);
 
+  const budgetAlertLevelRef = useRef<Record<string, 'none' | 'warning' | 'exceeded'>>({});
+  const monthBalanceAlertedRef = useRef(false);
+
   useEffect(() => {
     if (!isLoaded) return;
-
     currentMonthBudgetStatus.forEach((item) => {
       const key = `${item.budget.month}:${item.budget.category}`;
-      const currentLevel: 'none' | 'warning' | 'exceeded' = item.isExceeded
-        ? 'exceeded'
-        : item.percentage >= 80
-        ? 'warning'
-        : 'none';
+      const currentLevel: 'none' | 'warning' | 'exceeded' = item.isExceeded ? 'exceeded' : item.percentage >= 80 ? 'warning' : 'none';
       const previousLevel = budgetAlertLevelRef.current[key] ?? 'none';
-
       if (alertPreferences.budgetThreshold && currentLevel === 'warning' && previousLevel === 'none') {
-        addToast(`Atencao: ${item.budget.category} atingiu ${item.percentage.toFixed(0)}% do orcamento.`, 'warning');
+        addToast(`Atenção: ${item.budget.category} atingiu ${item.percentage.toFixed(0)}% do orçamento.`, 'warning');
       }
-
       if (alertPreferences.budgetExceeded && currentLevel === 'exceeded' && previousLevel !== 'exceeded') {
-        addToast(`Orcamento excedido em ${item.budget.category}.`, 'error');
+        addToast(`Orçamento excedido em ${item.budget.category}.`, 'error');
       }
-
       budgetAlertLevelRef.current[key] = currentLevel;
     });
   }, [isLoaded, currentMonthBudgetStatus, addToast, alertPreferences.budgetExceeded, alertPreferences.budgetThreshold]);
 
   useEffect(() => {
     if (!isLoaded) return;
-
     if (alertPreferences.negativeBalance && currentMonthBalance < 0 && !monthBalanceAlertedRef.current) {
       addToast('Alerta: saldo mensal ficou negativo.', 'error');
       monthBalanceAlertedRef.current = true;
       return;
     }
-
-    if (currentMonthBalance >= 0) {
-      monthBalanceAlertedRef.current = false;
-    }
+    if (currentMonthBalance >= 0) monthBalanceAlertedRef.current = false;
   }, [isLoaded, currentMonthBalance, addToast, alertPreferences.negativeBalance]);
 
+  // ââ€â‚¬ââ€â‚¬ Ctrl+N global shortcut ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        setCommandPaletteOpen(o => !o);
+        return;
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+        e.preventDefault();
+        setActiveTab('transactions');
+        setTimeout(() => {
+          const firstInput = document.querySelector<HTMLInputElement>('input[placeholder*="Mercado"]');
+          firstInput?.focus();
+        }, 100);
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, []);
+
+  // ââ€â‚¬ââ€â‚¬ Handlers ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬
+  const handleAddTransaction = useCallback((data: Parameters<typeof addTransaction>[0]) => {
+    addTransaction({ ...data, accountId: selectedAccount || undefined });
+    addToast(`${data.type === 'income' ? 'Receita' : 'Despesa'} adicionada!`, 'success');
+  }, [addTransaction, selectedAccount, addToast]);
+
+  const handleEditTransaction = useCallback((id: string, updates: Partial<Transaction>) => {
+    updateTransaction(id, updates);
+    addToast('Transação atualizada!', 'success');
+  }, [updateTransaction, addToast]);
+
+  const handleDeleteClick = useCallback((id: string) => {
+    setTransactionToDelete(id);
+    setDeleteModalOpen(true);
+  }, []);
+
+  const handleConfirmDelete = useCallback(() => {
+    if (transactionToDelete) {
+      deleteTransaction(transactionToDelete);
+      addToast('Transação excluída!', 'success');
+      setTransactionToDelete(null);
+    }
+    setDeleteModalOpen(false);
+  }, [transactionToDelete, deleteTransaction, addToast]);
+
+  const handleAddGoal = useCallback((goal: Parameters<typeof addGoal>[0]) => {
+    addGoal(goal);
+    addToast('Meta criada!', 'success');
+  }, [addGoal, addToast]);
+
+  const handleDeleteGoal = useCallback((id: string) => {
+    deleteGoal(id);
+    addToast('Meta excluída!', 'success');
+  }, [deleteGoal, addToast]);
+
+  const handleContributeToGoal = useCallback((goalId: string, amount: number) => {
+    contributeToGoal(goalId, amount);
+    addToast(`Contribuição de R$ ${amount.toFixed(2)} adicionada!`, 'success');
+  }, [contributeToGoal, addToast]);
+
+  const handleAddAccount = useCallback((account: Parameters<typeof addAccount>[0]) => {
+    addAccount(account);
+    addToast('Conta criada!', 'success');
+  }, [addAccount, addToast]);
+
+  const handleDeleteAccount = useCallback((id: string) => {
+    const fallbackAccount = accounts.find((a) => a.id !== id);
+    if (!fallbackAccount) {
+      addToast('Não é possível excluir a última conta.', 'error');
+      return;
+    }
+    reassignAccountReferences(id, fallbackAccount.id);
+    reassignInstallmentAccountReferences(id, fallbackAccount.id);
+    deleteAccount(id);
+    addToast(`Conta excluída. Lançamentos movidos para ${fallbackAccount.name}.`, 'success');
+    if (selectedAccount === id) setSelectedAccount(null);
+  }, [accounts, reassignAccountReferences, reassignInstallmentAccountReferences, deleteAccount, addToast, selectedAccount]);
+
+  const handleAddRecurring = useCallback((r: Parameters<typeof addRecurring>[0]) => {
+    addRecurring(r);
+    addToast('Transação recorrente criada!', 'success');
+  }, [addRecurring, addToast]);
+
+  const handleDeleteRecurring = useCallback((id: string) => {
+    deleteRecurring(id);
+    addToast('Recorrência excluída!', 'success');
+  }, [deleteRecurring, addToast]);
+
+  const handleToggleRecurring = useCallback((id: string, isActive: boolean) => {
+    updateRecurring(id, { isActive });
+    addToast(isActive ? 'Recorrência ativada!' : 'Recorrência pausada!', 'success');
+  }, [updateRecurring, addToast]);
+
+  const handleTransferBetweenAccounts = useCallback((data: {
+    fromAccountId: string; toAccountId: string; amount: number; date?: string; description?: string;
+  }) => {
+    transferBetweenAccounts(data);
+    addToast('Transferência realizada!', 'success');
+  }, [transferBetweenAccounts, addToast]);
+
+  const handleAddBudget = useCallback((budget: Parameters<typeof addBudget>[0]) => {
+    addBudget(budget);
+    addToast(`Limite para ${budget.category} salvo!`, 'success');
+  }, [addBudget, addToast]);
+
+  const handleDeleteBudget = useCallback((id: string) => {
+    deleteBudget(id);
+    addToast('Orçamento removido!', 'success');
+  }, [deleteBudget, addToast]);
+
+  const handleCopyFromPreviousMonth = useCallback(() => {
+    const sourceMonth = shiftMonthLocalISO(selectedBudgetMonth, -1);
+    const sourceBudgets = budgets.filter((b) => b.month === sourceMonth);
+    if (sourceBudgets.length === 0) {
+      addToast('Não há orçamentos no mês anterior para copiar.', 'info');
+      return;
+    }
+    sourceBudgets.forEach((b) => addBudget({ category: b.category, amount: b.amount, month: selectedBudgetMonth }));
+    addToast(`${sourceBudgets.length} limite(s) copiados!`, 'success');
+  }, [selectedBudgetMonth, budgets, addBudget, addToast]);
+
+  const handlePayCreditInvoice = useCallback((data: {
+    accountId: string; month: string; amount: number; paymentAccountId: string; paymentDate: string;
+  }) => {
+    transferBetweenAccounts({
+      fromAccountId: data.paymentAccountId,
+      toAccountId: data.accountId,
+      amount: data.amount,
+      date: data.paymentDate,
+      description: `Fatura ${data.month}`,
+    });
+    addToast(`Fatura de ${data.month} paga! R$ ${data.amount.toFixed(2)}`, 'success');
+  }, [transferBetweenAccounts, addToast]);
+
+  const handleImportData = useCallback((data: AppBackupData | LegacyTransactionsBackupData) => {
+    if ('finance' in data) {
+      replaceFinanceData(data.finance);
+      replaceInstallmentsData(data.installments);
+      setAlertPreferences({ ...defaultAlertPreferences, ...data.preferences.alertPreferences });
+      setTheme(data.preferences.theme);
+      setSelectedAccount(null);
+      addToast('Backup completo restaurado!', 'success');
+      return;
+    }
+    replaceFinanceData({ transactions: data.transactions, categories, goals, accounts, recurring, budgets });
+    setSelectedAccount(null);
+    addToast('Backup legado restaurado: apenas transações importadas.', 'warning');
+  }, [replaceFinanceData, replaceInstallmentsData, setTheme, addToast, categories, goals, accounts, recurring, budgets]);
+
+  // ââ€â‚¬ââ€â‚¬ Render ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬ââ€â‚¬
   if (!isLoaded) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg-primary)' }}>
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-          <span className="text-lg" style={{ color: 'var(--text-secondary)' }}>Carregando...</span>
+      <div className="app-shell min-h-screen flex items-center justify-center relative overflow-hidden">
+        <div className="relative flex flex-col items-center gap-4 z-10 glass p-8 rounded-2xl">
+          <div className="relative">
+            <div className="w-12 h-12 border-4 border-[var(--bg-tertiary)] rounded-2xl" />
+            <div className="w-12 h-12 border-4 border-[var(--accent-primary)] border-t-transparent rounded-2xl animate-spin absolute top-0 left-0" />
+          </div>
+          <span className="text-sm font-medium tracking-wide" style={{ color: 'var(--text-secondary)' }}>Iniciando...</span>
         </div>
       </div>
     );
   }
 
-  const handleAddTransaction = (data: Parameters<typeof addTransaction>[0]) => {
-    addTransaction({ ...data, accountId: selectedAccount || undefined });
-    addToast(`${data.type === 'income' ? 'Receita' : 'Despesa'} adicionada com sucesso!`, 'success');
-  };
+  if (hasPin && !isAuthenticated) {
+    return (
+      <PinLock
+        isLocked={isLocked}
+        hasPin={hasPin}
+        failedAttempts={failedAttempts}
+        onSetupPin={setupPin}
+        onVerifyPin={verifyPin}
+        getLockoutRemaining={getLockoutRemaining}
+      />
+    );
+  }
 
-  const handleDeleteClick = (id: string) => {
-    setTransactionToDelete(id);
-    setDeleteModalOpen(true);
-  };
-
-  const handleConfirmDelete = () => {
-    if (transactionToDelete) {
-      deleteTransaction(transactionToDelete);
-      addToast('Transacao excluida com sucesso!', 'success');
-      setTransactionToDelete(null);
-    }
-    setDeleteModalOpen(false);
-  };
-
-  const handleAddGoal = (goal: Parameters<typeof addGoal>[0]) => {
-    addGoal(goal);
-    addToast('Meta criada com sucesso!', 'success');
-  };
-
-  const handleDeleteGoal = (id: string) => {
-    deleteGoal(id);
-    addToast('Meta excluida!', 'success');
-  };
-
-  const handleContributeToGoal = (goalId: string, amount: number) => {
-    contributeToGoal(goalId, amount);
-    addToast(`Contribuicao de R$ ${amount.toFixed(2)} adicionada!`, 'success');
-  };
-
-  const handleAddAccount = (account: Parameters<typeof addAccount>[0]) => {
-    addAccount(account);
-    addToast('Conta criada com sucesso!', 'success');
-  };
-
-  const handleDeleteAccount = (id: string) => {
-    const fallbackAccount = accounts.find((account) => account.id !== id);
-
-    if (!fallbackAccount) {
-      addToast('Nao foi possivel excluir a ultima conta disponivel.', 'error');
-      return;
-    }
-
-    reassignAccountReferences(id, fallbackAccount.id);
-    reassignInstallmentAccountReferences(id, fallbackAccount.id);
-    deleteAccount(id);
-    addToast(`Conta excluida e lancamentos movidos para ${fallbackAccount.name}.`, 'success');
-
-    if (selectedAccount === id) {
-      setSelectedAccount(null);
-    }
-  };
-
-  const handleAddRecurring = (recurringItem: Parameters<typeof addRecurring>[0]) => {
-    addRecurring(recurringItem);
-    addToast('Transacao recorrente criada!', 'success');
-  };
-
-  const handleDeleteRecurring = (id: string) => {
-    deleteRecurring(id);
-    addToast('Recorrencia excluida!', 'success');
-  };
-
-  const handleToggleRecurring = (id: string, isActive: boolean) => {
-    updateRecurring(id, { isActive });
-    addToast(isActive ? 'Recorrencia ativada!' : 'Recorrencia pausada!', 'success');
-  };
-
-  const handleTransferBetweenAccounts = (data: {
-    fromAccountId: string;
-    toAccountId: string;
-    amount: number;
-    date?: string;
-    description?: string;
-  }) => {
-    transferBetweenAccounts(data);
-    addToast('Transferencia realizada com sucesso!', 'success');
-  };
-
-  const handleAddBudget = (budget: Parameters<typeof addBudget>[0]) => {
-    addBudget(budget);
-    addToast(`Limite para ${budget.category} salvo!`, 'success');
-  };
-
-  const handleDeleteBudget = (id: string) => {
-    deleteBudget(id);
-    addToast('Orcamento removido!', 'success');
-  };
-
-  const handleCopyFromPreviousMonth = () => {
-    const sourceMonth = shiftMonthLocalISO(selectedBudgetMonth, -1);
-    const sourceBudgets = budgets.filter((budget) => budget.month === sourceMonth);
-
-    if (sourceBudgets.length === 0) {
-      addToast('Nao ha orcamentos no mes anterior para copiar.', 'info');
-      return;
-    }
-
-    sourceBudgets.forEach((budget) => {
-      addBudget({
-        category: budget.category,
-        amount: budget.amount,
-        month: selectedBudgetMonth,
-      });
-    });
-
-    addToast(`${sourceBudgets.length} limite(s) copiados para ${selectedBudgetMonth}.`, 'success');
-  };
-
-  const handleImportData = (data: AppBackupData | LegacyTransactionsBackupData) => {
-    if ('finance' in data) {
-      replaceFinanceData(data.finance);
-      replaceInstallmentsData(data.installments);
-      setAlertPreferences({
-        ...defaultAlertPreferences,
-        ...data.preferences.alertPreferences,
-      });
-      setTheme(data.preferences.theme);
-      setSelectedAccount(null);
-      addToast('Backup completo restaurado com sucesso!', 'success');
-      return;
-    }
-
-    replaceFinanceData({
-      transactions: data.transactions,
-      categories,
-      goals,
-      accounts,
-      recurring,
-      budgets,
-    });
-    setSelectedAccount(null);
-    addToast('Backup legado restaurado: apenas transacoes foram importadas.', 'warning');
+  const PAGE_TITLES: Record<Tab, { title: string; subtitle: string }> = {
+    dashboard: { title: 'Dashboard', subtitle: 'Visão geral das suas finanças' },
+    transactions: { title: 'Transações', subtitle: 'Gerencie receitas e despesas — Ctrl+N para nova transação' },
+    accounts: { title: 'Contas', subtitle: 'Contas e carteiras' },
+    creditcard: { title: 'Cartão de Crédito', subtitle: 'Controle de faturas mensais' },
+    budgets: { title: 'Orçamentos', subtitle: 'Limites mensais por categoria' },
+    installments: { title: 'Parcelamentos', subtitle: 'Controle suas compras parceladas' },
+    goals: { title: 'Metas Financeiras', subtitle: 'Defina e acompanhe objetivos' },
+    recurring: { title: 'Transações Recorrentes', subtitle: 'Automatize transações fixas' },
+    categories: { title: 'Categorias', subtitle: 'Gerencie suas categorias' },
+    analytics: { title: 'Análises', subtitle: 'Gráficos e insights detalhados' },
   };
 
   const renderContent = () => {
@@ -386,9 +422,9 @@ function App() {
             transactions={transactions}
             budgetStatus={currentMonthBudgetStatus}
             alertPreferences={alertPreferences}
-            onAlertPreferencesChange={(updates) => {
-              setAlertPreferences((prev) => ({ ...prev, ...updates }));
-            }}
+            onAlertPreferencesChange={(updates) => setAlertPreferences((prev) => ({ ...prev, ...updates }))}
+            accounts={accounts}
+            accountBalances={accountBalances}
           />
         );
       case 'transactions':
@@ -400,6 +436,7 @@ function App() {
             onFilterChange={setFilteredTransactions}
             onAddTransaction={handleAddTransaction}
             onDeleteTransaction={handleDeleteClick}
+            onEditTransaction={handleEditTransaction}
           />
         );
       case 'accounts':
@@ -414,14 +451,22 @@ function App() {
             onTransferBetweenAccounts={handleTransferBetweenAccounts}
           />
         );
+      case 'creditcard':
+        return (
+          <CreditCardPage
+            accounts={accounts}
+            transactions={transactions}
+            onPayInvoice={handlePayCreditInvoice}
+          />
+        );
       case 'budgets':
         return (
           <BudgetsPage
             categories={categories}
-            budgets={budgets.filter((budget) => budget.month === selectedBudgetMonth)}
+            budgets={budgets.filter((b) => b.month === selectedBudgetMonth)}
             budgetStatus={selectedMonthBudgetStatus}
             selectedMonth={selectedBudgetMonth}
-            canCopyFromPreviousMonth={budgets.some((budget) => budget.month === shiftMonthLocalISO(selectedBudgetMonth, -1))}
+            canCopyFromPreviousMonth={budgets.some((b) => b.month === shiftMonthLocalISO(selectedBudgetMonth, -1))}
             onAddBudget={handleAddBudget}
             onDeleteBudget={handleDeleteBudget}
             onMonthChange={setSelectedBudgetMonth}
@@ -459,82 +504,78 @@ function App() {
             onToggleRecurring={handleToggleRecurring}
           />
         );
+      case 'categories':
+        return (
+          <CategoriesPage
+            categories={categories}
+            onAddCategory={addCategory}
+            onUpdateCategory={updateCategory}
+            onDeleteCategory={deleteCategory}
+          />
+        );
       case 'analytics':
-        return <AnalyticsPage transactions={transactions} goals={goals} />;
+        return (
+          <AnalyticsPage
+            transactions={transactions}
+            goals={goals}
+            recurring={recurring}
+            installments={installments}
+            payments={payments}
+            accountBalances={accountBalances}
+          />
+        );
       default:
         return null;
     }
   };
 
-  if (hasPin && !isAuthenticated) {
-    return (
-      <PinLock
-        isLocked={isLocked}
-        hasPin={hasPin}
-        failedAttempts={failedAttempts}
-        onSetupPin={setupPin}
-        onVerifyPin={verifyPin}
-        getLockoutRemaining={getLockoutRemaining}
-      />
-    );
-  }
+  const { title, subtitle } = PAGE_TITLES[activeTab] ?? { title: '', subtitle: '' };
 
   return (
-    <div className="min-h-screen flex" style={{ background: 'var(--bg-primary)' }}>
+    <div className="app-shell min-h-screen flex">
       <ToastContainer toasts={toasts} onRemove={removeToast} />
 
       <ConfirmModal
         isOpen={deleteModalOpen}
-        title="Excluir Transacao"
-        message="Tem certeza que deseja excluir esta transacao? Esta acao nao pode ser desfeita."
+        title="Excluir Transação"
+        message="Tem certeza que deseja excluir esta transação? Esta ação não pode ser desfeita."
         onConfirm={handleConfirmDelete}
-        onCancel={() => {
-          setDeleteModalOpen(false);
-          setTransactionToDelete(null);
-        }}
+        onCancel={() => { setDeleteModalOpen(false); setTransactionToDelete(null); }}
         confirmText="Excluir"
         cancelText="Cancelar"
         type="danger"
       />
 
-      <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
+      <Sidebar activeTab={activeTab} onTabChange={setActiveTab} alerts={sidebarAlerts} />
 
-      <main className="flex-1 overflow-auto">
-        <header className="sticky top-0 z-30 backdrop-blur-md px-8 py-4" style={{ background: 'rgba(var(--bg-primary-rgb), 0.8)', borderBottom: '1px solid var(--border-color)' }}>
-          <div className="flex items-center justify-between max-w-6xl">
+      <main className="flex-1 overflow-auto relative">
+        <header
+          className="sticky top-0 z-30 px-8 py-4 transition-all duration-300"
+          style={{ 
+            background: 'rgba(var(--bg-primary-rgb), 0.78)', 
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            borderBottom: '1px solid var(--border-color)' 
+          }}
+        >
+          <div className="flex items-center justify-between animate-fade-in-up">
             <div>
-              <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
-                {activeTab === 'dashboard' && 'Dashboard'}
-                {activeTab === 'transactions' && 'Transacoes'}
-                {activeTab === 'accounts' && 'Contas'}
-                {activeTab === 'budgets' && 'Orcamentos'}
-                {activeTab === 'installments' && 'Parcelamentos'}
-                {activeTab === 'goals' && 'Metas Financeiras'}
-                {activeTab === 'recurring' && 'Transacoes Recorrentes'}
-                {activeTab === 'analytics' && 'Analises'}
-              </h1>
-              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                {activeTab === 'dashboard' && 'Visao geral das suas financas'}
-                {activeTab === 'transactions' && 'Gerencie receitas e despesas'}
-                {activeTab === 'accounts' && 'Contas e carteiras'}
-                {activeTab === 'budgets' && 'Limites mensais por categoria'}
-                {activeTab === 'installments' && 'Controle suas compras parceladas'}
-                {activeTab === 'goals' && 'Defina e acompanhe objetivos'}
-                {activeTab === 'recurring' && 'Automatize transacoes fixas'}
-                {activeTab === 'analytics' && 'Graficos e insights detalhados'}
-              </p>
+              <h1 className="text-3xl font-display font-semibold tracking-tight" style={{ color: 'var(--text-primary)' }}>{title}</h1>
+              <p className="text-sm font-medium mt-0.5" style={{ color: 'var(--text-muted)' }}>{subtitle}</p>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              <PrivacyToggle />
               <ThemeToggle isDark={isDark} onToggle={toggleTheme} />
               <DataExport
                 transactions={transactions}
+                accounts={accounts}
                 backupData={backupData}
                 onImport={handleImportData}
               />
               {hasPin && (
                 <button
                   onClick={logout}
-                  className="px-3 py-2 rounded-xl text-sm font-medium transition-colors hover:bg-red-500/20 hover:text-red-400"
+                  className="px-4 py-2 rounded-2xl text-sm font-semibold transition-all duration-300 hover:bg-red-500/10 hover:text-red-400 hover:shadow-lg hover:shadow-red-500/10"
                   style={{ color: 'var(--text-secondary)' }}
                 >
                   Bloquear
@@ -544,11 +585,19 @@ function App() {
           </div>
         </header>
 
-        <div className="p-8 w-full">
+        <div className="p-8 w-full max-w-[1600px] mx-auto animate-fade-in-up delay-100">
           {renderContent()}
         </div>
       </main>
 
+      <CommandPalette
+        isOpen={commandPaletteOpen}
+        transactions={transactions}
+        accounts={accounts}
+        goals={goals}
+        onNavigate={(tab) => { setActiveTab(tab); setCommandPaletteOpen(false); }}
+        onClose={() => setCommandPaletteOpen(false)}
+      />
       <OfflineIndicator />
       <PWAInstallPrompt />
       <UpdatePrompt />
@@ -556,4 +605,13 @@ function App() {
   );
 }
 
-export default App
+function App() {
+  return (
+    <PrivacyProvider>
+      <AppInner />
+    </PrivacyProvider>
+  );
+}
+
+export default App;
+

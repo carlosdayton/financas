@@ -55,7 +55,7 @@ export function Toast({ toast, onRemove }: ToastProps) {
 
   return (
     <div
-      className={`relative flex items-center gap-3 px-4 py-3 rounded-xl border ${style.bg} ${style.border} shadow-lg animate-in slide-in-from-right-full duration-300`}
+      className={`relative flex items-center gap-3 px-4 py-3 rounded-2xl border ${style.bg} ${style.border} shadow-lg animate-in slide-in-from-right-full duration-300`}
     >
       <Icon className={`w-5 h-5 ${style.icon} flex-shrink-0`} />
       <p className="text-sm font-medium pr-4" style={{ color: 'var(--text-primary)' }}>{toast.message}</p>

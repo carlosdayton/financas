@@ -113,7 +113,7 @@ export function Accounts({ accounts, accountBalances, onAddAccount, onDeleteAcco
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-xl font-bold flex items-center gap-3" style={{ color: 'var(--text-primary)' }}>
-              <div className="p-2 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 rounded-lg">
+              <div className="p-2 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 rounded-2xl">
                 <Landmark className="w-5 h-5 text-emerald-400" />
               </div>
               Minhas Contas
@@ -124,7 +124,7 @@ export function Accounts({ accounts, accountBalances, onAddAccount, onDeleteAcco
           </div>
           <button
             onClick={() => setIsAdding(!isAdding)}
-            className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl transition-all"
+            className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-white rounded-2xl transition-all"
           >
             <Plus className="w-4 h-4" />
             Nova Conta
@@ -132,7 +132,7 @@ export function Accounts({ accounts, accountBalances, onAddAccount, onDeleteAcco
         </div>
 
         {isAdding && (
-          <form onSubmit={handleSubmit} className="mb-6 p-4 rounded-xl space-y-4" style={{ background: 'var(--bg-tertiary)' }}>
+          <form onSubmit={handleSubmit} className="mb-6 p-4 rounded-2xl space-y-4" style={{ background: 'var(--bg-tertiary)' }}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Nome da Conta</label>
@@ -141,7 +141,7 @@ export function Accounts({ accounts, accountBalances, onAddAccount, onDeleteAcco
                   value={newAccount.name}
                   onChange={(e) => setNewAccount({ ...newAccount, name: e.target.value })}
                   placeholder="Ex: Nubank, Itaú..."
-                  className="w-full px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                  className="w-full px-4 py-2 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
                   style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
                   required
                 />
@@ -151,7 +151,7 @@ export function Accounts({ accounts, accountBalances, onAddAccount, onDeleteAcco
                 <select
                   value={newAccount.type}
                   onChange={(e) => setNewAccount({ ...newAccount, type: e.target.value as Account['type'] })}
-                  className="w-full px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                  className="w-full px-4 py-2 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
                   style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
                 >
                   {ACCOUNT_TYPES.map((type) => (
@@ -168,7 +168,7 @@ export function Accounts({ accounts, accountBalances, onAddAccount, onDeleteAcco
                     key={color.value}
                     type="button"
                     onClick={() => setNewAccount({ ...newAccount, color: color.value })}
-                    className={`w-8 h-8 rounded-full transition-all ${
+                    className={`w-8 h-8 rounded-2xl transition-all ${
                       newAccount.color === color.value ? 'ring-2 ring-white scale-110' : 'hover:scale-105'
                     }`}
                     style={{ backgroundColor: color.value }}
@@ -180,14 +180,14 @@ export function Accounts({ accounts, accountBalances, onAddAccount, onDeleteAcco
             <div className="flex gap-3">
               <button
                 type="submit"
-                className="flex-1 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-medium rounded-xl hover:from-emerald-400 hover:to-teal-400 transition-all"
+                className="flex-1 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-medium rounded-2xl hover:from-emerald-400 hover:to-teal-400 transition-all"
               >
                 Criar Conta
               </button>
               <button
                 type="button"
                 onClick={() => setIsAdding(false)}
-                className="px-4 py-2 bg-[#1a1a2e] text-[#a0a0b8] rounded-xl hover:text-white transition-all"
+                className="px-4 py-2 bg-[#1a1a2e] text-[#a0a0b8] rounded-2xl hover:text-white transition-all"
               >
                 Cancelar
               </button>
@@ -196,7 +196,7 @@ export function Accounts({ accounts, accountBalances, onAddAccount, onDeleteAcco
         )}
 
         {accounts.length >= 2 && (
-          <form onSubmit={handleTransfer} className="mb-6 p-4 rounded-xl space-y-4" style={{ background: 'var(--bg-tertiary)' }}>
+          <form onSubmit={handleTransfer} className="mb-6 p-4 rounded-2xl space-y-4" style={{ background: 'var(--bg-tertiary)' }}>
             <div className="flex items-center gap-2">
               <ArrowRightLeft className="w-4 h-4 text-indigo-400" />
               <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Transferencia entre contas</h3>
@@ -207,7 +207,7 @@ export function Accounts({ accounts, accountBalances, onAddAccount, onDeleteAcco
                 <select
                   value={transfer.fromAccountId}
                   onChange={(e) => setTransfer({ ...transfer, fromAccountId: e.target.value })}
-                  className="w-full px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                  className="w-full px-4 py-2 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                   style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
                   required
                 >
@@ -221,7 +221,7 @@ export function Accounts({ accounts, accountBalances, onAddAccount, onDeleteAcco
                 <select
                   value={transfer.toAccountId}
                   onChange={(e) => setTransfer({ ...transfer, toAccountId: e.target.value })}
-                  className="w-full px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                  className="w-full px-4 py-2 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                   style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
                   required
                 >
@@ -239,7 +239,7 @@ export function Accounts({ accounts, accountBalances, onAddAccount, onDeleteAcco
                   value={transfer.amount}
                   onChange={(e) => setTransfer({ ...transfer, amount: e.target.value })}
                   placeholder="0,00"
-                  className="w-full px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                  className="w-full px-4 py-2 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                   style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
                   required
                 />
@@ -250,7 +250,7 @@ export function Accounts({ accounts, accountBalances, onAddAccount, onDeleteAcco
                   type="date"
                   value={transfer.date}
                   onChange={(e) => setTransfer({ ...transfer, date: e.target.value })}
-                  className="w-full px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                  className="w-full px-4 py-2 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                   style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
                   required
                 />
@@ -262,13 +262,13 @@ export function Accounts({ accounts, accountBalances, onAddAccount, onDeleteAcco
                 value={transfer.description}
                 onChange={(e) => setTransfer({ ...transfer, description: e.target.value })}
                 placeholder="Descricao (opcional)"
-                className="w-full px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                className="w-full px-4 py-2 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                 style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
               />
               <button
                 type="submit"
                 disabled={transfer.fromAccountId === transfer.toAccountId}
-                className="px-5 py-2 bg-indigo-500 hover:bg-indigo-400 text-white rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-5 py-2 bg-indigo-500 hover:bg-indigo-400 text-white rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Transferir
               </button>
@@ -280,7 +280,7 @@ export function Accounts({ accounts, accountBalances, onAddAccount, onDeleteAcco
           {/* All accounts option */}
           <button
             onClick={() => onSelectAccount(null)}
-            className={`p-4 rounded-xl border transition-all text-left ${
+            className={`p-4 rounded-2xl border transition-all text-left ${
               selectedAccount === null
                 ? 'bg-emerald-500/10 border-emerald-500/30'
                 : ''
@@ -288,7 +288,7 @@ export function Accounts({ accounts, accountBalances, onAddAccount, onDeleteAcco
             style={selectedAccount !== null ? { background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)' } : undefined}
           >
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
                 <Landmark className="w-5 h-5 text-white" />
               </div>
               <div>
@@ -307,7 +307,7 @@ export function Accounts({ accounts, accountBalances, onAddAccount, onDeleteAcco
               <div
                 key={account.id}
                 onClick={() => onSelectAccount(account.id)}
-                className={`relative p-4 rounded-xl border cursor-pointer transition-all group ${
+                className={`relative p-4 rounded-2xl border cursor-pointer transition-all group ${
                   selectedAccount === account.id
                     ? 'bg-[#252542] border-emerald-500/30'
                     : 'bg-[#252542] border-[#2a2a45] hover:border-[#3a3a55]'
@@ -319,7 +319,7 @@ export function Accounts({ accounts, accountBalances, onAddAccount, onDeleteAcco
                       e.stopPropagation();
                       onDeleteAccount(account.id);
                     }}
-                    className="absolute top-2 right-2 p-1.5 text-[#6b6b8a] hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                    className="absolute top-2 right-2 p-1.5 text-[#6b6b8a] hover:text-red-400 hover:bg-red-500/10 rounded-2xl transition-all opacity-0 group-hover:opacity-100"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -327,7 +327,7 @@ export function Accounts({ accounts, accountBalances, onAddAccount, onDeleteAcco
                 
                 <div className="flex items-center gap-3 mb-2">
                   <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center"
+                    className="w-10 h-10 rounded-2xl flex items-center justify-center"
                     style={{ backgroundColor: `${account.color}20` }}
                   >
                     <Icon className="w-5 h-5" style={{ color: account.color }} />

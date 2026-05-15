@@ -9,7 +9,7 @@ export function ThemeToggle({ isDark, onToggle }: ThemeToggleProps) {
   return (
     <button
       onClick={onToggle}
-      className="relative p-2.5 rounded-xl bg-[#252542] text-[#a0a0b8] hover:text-white transition-all overflow-hidden group"
+      className="relative p-2.5 rounded-2xl bg-[#252542] text-[#a0a0b8] hover:text-white transition-all overflow-hidden group"
       title={isDark ? 'Mudar para tema claro' : 'Mudar para tema escuro'}
     >
       <div className="relative w-5 h-5">

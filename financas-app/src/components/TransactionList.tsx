@@ -1,127 +1,164 @@
-import { Trash2, TrendingUp, TrendingDown, Receipt } from 'lucide-react';
+import { useState } from 'react';
+import { Trash2, Pencil, ChevronDown, ChevronUp } from 'lucide-react';
 import type { Transaction } from '../types/finance';
+import { usePrivacy } from '../contexts/PrivacyContext';
+import { getTodayLocalISO } from '../utils/date';
 
 interface TransactionListProps {
   transactions: Transaction[];
   onDelete: (id: string) => void;
+  onEdit: (transaction: Transaction) => void;
 }
 
-export function TransactionList({ transactions, onDelete }: TransactionListProps) {
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(value);
-  };
+function groupByDate(transactions: Transaction[]): [string, Transaction[]][] {
+  const groups = new Map<string, Transaction[]>();
+  for (const t of transactions) {
+    const key = t.date;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key)!.push(t);
+  }
+  return Array.from(groups.entries()).sort((a, b) => b[0].localeCompare(a[0]));
+}
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    });
-  };
+function formatDateLabel(dateStr: string): string {
+  const today = getTodayLocalISO();
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const date = new Date(y, m - 1, d);
+  if (dateStr === today) return 'Hoje';
+  const [ty, tm, td] = today.split('-').map(Number);
+  const todayDate = new Date(ty, tm - 1, td);
+  const diffDays = Math.round((todayDate.getTime() - date.getTime()) / 86400000);
+  if (diffDays === 1) return 'Ontem';
+  return date.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short' });
+}
+
+export function TransactionList({ transactions, onDelete, onEdit }: TransactionListProps) {
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const { mask } = usePrivacy();
+
+  const formatCurrency = (value: number) =>
+    mask(new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value));
 
   if (transactions.length === 0) {
     return (
-      <div className="relative">
-        <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-2xl blur-xl" />
-        <div className="relative rounded-2xl p-12 text-center" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-          <div className="w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center" style={{ background: 'var(--bg-tertiary)' }}>
-            <Receipt className="w-10 h-10" style={{ color: 'var(--text-muted)' }} />
-          </div>
-          <h3 className="text-xl font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Nenhuma transação</h3>
-          <p style={{ color: 'var(--text-secondary)' }}>
-            Adicione sua primeira receita ou despesa para começar!
-          </p>
-        </div>
+      <div className="py-14 text-center border border-dashed border-[var(--border-color)] rounded-lg">
+        <p className="text-sm text-[var(--text-muted)]">Nenhuma transação encontrada</p>
       </div>
     );
   }
 
+  const groups = groupByDate(transactions);
+
   return (
-    <div className="relative">
-      <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-2xl blur-xl" />
-      
-      <div className="relative rounded-2xl overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-        <div className="p-6" style={{ borderBottom: '1px solid var(--border-color)' }}>
-          <h2 className="text-xl font-bold flex items-center gap-3" style={{ color: 'var(--text-primary)' }}>
-            <div className="p-2 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-lg">
-              <Receipt className="w-5 h-5 text-indigo-400" />
+    <div className="border border-[var(--border-color)] rounded-lg overflow-hidden divide-y divide-[var(--border-color)]">
+      {groups.map(([date, group]) => {
+        const dayBalance = group
+          .filter(t => !t.isTransfer)
+          .reduce((s, t) => s + (t.type === 'income' ? t.amount : -t.amount), 0);
+
+        return (
+          <div key={date}>
+            {/* Date header */}
+            <div className="px-4 py-2 flex items-center justify-between bg-[var(--bg-secondary)]">
+              <span className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
+                {formatDateLabel(date)}
+              </span>
+              <span className={`text-xs font-mono font-bold ${dayBalance >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+                {dayBalance >= 0 ? '+' : ''}{formatCurrency(dayBalance)}
+              </span>
             </div>
-            Transações Recentes
-          </h2>
-        </div>
 
-        <div style={{ borderTop: '1px solid var(--border-color)' }}>
-          {transactions.map((transaction, index) => (
-            <div
-              key={transaction.id}
-              className="p-4 flex items-center justify-between transition-all duration-300 group"
-              style={{ animationDelay: `${index * 50}ms`, borderBottom: '1px solid var(--border-color)' }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-secondary)'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-            >
-              <div className="flex items-center gap-4">
+            {/* Transactions */}
+            {group.map((t) => {
+              const isExpanded = expandedId === t.id;
+              const stripColor = t.isTransfer
+                ? 'bg-[var(--text-muted)]'
+                : t.type === 'income'
+                ? 'bg-emerald-500'
+                : 'bg-red-500';
+              const amountColor = t.isTransfer
+                ? 'text-[var(--text-secondary)]'
+                : t.type === 'income'
+                ? 'text-emerald-500'
+                : 'text-[var(--text-primary)]';
+
+              return (
                 <div
-                  className={`p-3 rounded-xl ${
-                    transaction.type === 'income'
-                      ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                      : 'bg-red-500/10 text-red-400 border border-red-500/20'
-                  }`}
+                  key={t.id}
+                  className="group flex items-start px-4 py-3 hover:bg-[var(--bg-secondary)] transition-colors"
                 >
-                  {transaction.type === 'income' ? (
-                    <TrendingUp className="w-5 h-5" />
-                  ) : (
-                    <TrendingDown className="w-5 h-5" />
-                  )}
-                </div>
+                  {/* Left color strip */}
+                  <div className={`w-0.5 self-stretch mr-3 rounded-full flex-shrink-0 mt-0.5 ${stripColor}`} />
 
-                <div>
-                  <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>{transaction.description}</p>
-                  <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
-                    <span className="px-2 py-0.5 rounded-full text-xs" style={{ background: 'var(--bg-tertiary)' }}>
-                      {transaction.category}
-                    </span>
-                    <span>•</span>
-                    <span>{formatDate(transaction.date)}</span>
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-[var(--text-primary)] truncate leading-snug">
+                          {t.description}
+                        </p>
+                        <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                          {t.category}
+                          {t.isRecurring && (
+                            <span className="ml-2 text-[var(--accent-secondary)]">· recorrente</span>
+                          )}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-0.5 flex-shrink-0">
+                        <span className={`text-sm font-mono font-bold ${amountColor}`}>
+                          {t.isTransfer
+                            ? formatCurrency(t.amount)
+                            : `${t.type === 'income' ? '+' : '-'}${formatCurrency(t.amount)}`}
+                        </span>
+
+                        {t.notes && (
+                          <button
+                            onClick={() => setExpandedId(isExpanded ? null : t.id)}
+                            className="p-1 opacity-0 group-hover:opacity-100 text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+                          >
+                            {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                          </button>
+                        )}
+
+                        {!t.isTransfer && (
+                          <button
+                            onClick={() => onEdit(t)}
+                            className="p-1 opacity-0 group-hover:opacity-100 text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+                            title="Editar"
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+
+                        <button
+                          onClick={() => onDelete(t.id)}
+                          className="p-1 opacity-0 group-hover:opacity-100 text-[var(--text-muted)] hover:text-red-500 transition-colors"
+                          title="Excluir"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {t.notes && isExpanded && (
+                      <p className="mt-2 text-xs text-[var(--text-secondary)] italic border-l-2 border-[var(--border-color)] pl-2.5">
+                        {t.notes}
+                      </p>
+                    )}
                   </div>
                 </div>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <span
-                  className={`font-bold text-lg ${
-                    transaction.type === 'income'
-                      ? 'text-emerald-400'
-                      : 'text-red-400'
-                  }`}
-                >
-                  {transaction.type === 'income' ? '+' : '-'}
-                  {formatCurrency(transaction.amount)}
-                </span>
-
-                <button
-                  onClick={() => onDelete(transaction.id)}
-                  className="p-2 text-[#6b6b8a] hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
-                  title="Excluir transação"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-        
-        {transactions.length >= 20 && (
-          <div className="p-4 text-center border-t border-[#2a2a45]">
-            <p className="text-sm text-[#6b6b8a]">
-              Mostrando as 20 transações mais recentes
-            </p>
+              );
+            })}
           </div>
-        )}
-      </div>
+        );
+      })}
+
+      {transactions.length >= 50 && (
+        <div className="px-4 py-3 text-center bg-[var(--bg-secondary)]">
+          <p className="text-xs text-[var(--text-muted)]">Mostrando as 50 transações mais recentes</p>
+        </div>
+      )}
     </div>
   );
 }

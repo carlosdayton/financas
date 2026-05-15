@@ -28,10 +28,7 @@ export function AccountsPage({
 }: AccountsPageProps) {
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-white">Contas</h2>
-        <p className="text-[#a0a0b8]">Gerencie suas contas e carteiras</p>
-      </div>
+
 
       <Accounts
         accounts={accounts}

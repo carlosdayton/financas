@@ -8,6 +8,7 @@ export interface Transaction {
   category: string;
   date: string;
   createdAt: string;
+  notes?: string;
   accountId?: string;
   isRecurring?: boolean;
   recurringId?: string;
@@ -56,6 +57,19 @@ export interface Account {
   color: string;
   icon: string;
   isDefault?: boolean;
+  creditLimit?: number;
+  billingDay?: number;
+}
+
+export interface CreditCardInvoice {
+  id: string;
+  accountId: string;
+  month: string; // YYYY-MM
+  totalAmount: number;
+  dueDate: string;
+  isPaid: boolean;
+  paidDate?: string;
+  createdAt: string;
 }
 
 export interface RecurringTransaction {

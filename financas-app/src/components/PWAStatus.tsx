@@ -19,7 +19,7 @@ export function PWAInstallPrompt() {
     >
       <div className="flex items-start gap-3">
         <div 
-          className="p-3 rounded-xl"
+          className="p-3 rounded-2xl"
           style={{ background: 'var(--bg-tertiary)' }}
         >
           <Download className="w-6 h-6 text-indigo-400" />
@@ -34,13 +34,13 @@ export function PWAInstallPrompt() {
           <div className="flex gap-2">
             <button
               onClick={install}
-              className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl font-medium text-sm hover:opacity-90 transition-opacity"
+              className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-2xl font-medium text-sm hover:opacity-90 transition-opacity"
             >
               Instalar
             </button>
             <button
               onClick={() => setDismissed(true)}
-              className="px-4 py-2 rounded-xl font-medium text-sm transition-colors"
+              className="px-4 py-2 rounded-2xl font-medium text-sm transition-colors"
               style={{ 
                 background: 'var(--bg-tertiary)', 
                 color: 'var(--text-secondary)' 
@@ -70,7 +70,7 @@ export function OfflineIndicator() {
 
   return (
     <div 
-      className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-50 px-4 py-2 rounded-full flex items-center gap-2 shadow-lg transition-all ${
+      className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-50 px-4 py-2 rounded-2xl flex items-center gap-2 shadow-lg transition-all ${
         isOnline ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'
       }`}
       style={{ 
@@ -109,7 +109,7 @@ export function UpdatePrompt() {
     >
       <div className="flex items-start gap-3">
         <div 
-          className="p-3 rounded-xl"
+          className="p-3 rounded-2xl"
           style={{ background: 'var(--bg-tertiary)' }}
         >
           <RefreshCw className="w-6 h-6 text-indigo-400" />
@@ -124,13 +124,13 @@ export function UpdatePrompt() {
           <div className="flex gap-2">
             <button
               onClick={updateApp}
-              className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl font-medium text-sm hover:opacity-90 transition-opacity"
+              className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-2xl font-medium text-sm hover:opacity-90 transition-opacity"
             >
               Atualizar Agora
             </button>
             <button
               onClick={() => setDismissed(true)}
-              className="px-4 py-2 rounded-xl font-medium text-sm transition-colors"
+              className="px-4 py-2 rounded-2xl font-medium text-sm transition-colors"
               style={{ 
                 background: 'var(--bg-tertiary)', 
                 color: 'var(--text-secondary)' 

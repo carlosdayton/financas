@@ -4,7 +4,8 @@ import { InsightsDashboard } from '../components/InsightsDashboard';
 import { SmartSuggestions } from '../components/SmartSuggestions';
 import { FinancialAlerts } from '../components/FinancialAlerts';
 import { AlertPreferences, type AlertPreferencesState } from '../components/AlertPreferences';
-import type { FinancialSummary, MonthlyData, Goal, Transaction, BudgetStatus } from '../types/finance';
+import type { FinancialSummary, MonthlyData, Goal, Transaction, BudgetStatus, Account } from '../types/finance';
+import { getCurrentMonthLocalISO } from '../utils/date';
 
 interface DashboardPageProps {
   summary: FinancialSummary;
@@ -18,6 +19,8 @@ interface DashboardPageProps {
   budgetStatus: BudgetStatus[];
   alertPreferences: AlertPreferencesState;
   onAlertPreferencesChange: (updates: Partial<AlertPreferencesState>) => void;
+  accounts: Account[];
+  accountBalances: Record<string, number>;
 }
 
 export function DashboardPage({
@@ -29,20 +32,33 @@ export function DashboardPage({
   budgetStatus,
   alertPreferences,
   onAlertPreferencesChange,
+  accounts,
+  accountBalances,
 }: DashboardPageProps) {
-  const currentMonth = new Date().toISOString().substring(0, 7);
-  const currentMonthBalance = transactions
-    .filter((t) => t.date.startsWith(currentMonth) && !t.isTransfer)
-    .reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
+  const currentMonth = getCurrentMonthLocalISO();
+
+  const currentMonthTransactions = transactions.filter(
+    (t) => t.date.startsWith(currentMonth) && !t.isTransfer
+  );
+  const currentMonthIncome = currentMonthTransactions
+    .filter((t) => t.type === 'income')
+    .reduce((sum, t) => sum + t.amount, 0);
+  const currentMonthExpense = currentMonthTransactions
+    .filter((t) => t.type === 'expense')
+    .reduce((sum, t) => sum + t.amount, 0);
+  const currentMonthBalance = currentMonthIncome - currentMonthExpense;
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Visão Geral</h2>
-        <p style={{ color: 'var(--text-secondary)' }}>Resumo das suas finanças</p>
-      </div>
-
-      <Dashboard summary={summary} />
+      <Dashboard
+        summary={summary}
+        currentMonthIncome={currentMonthIncome}
+        currentMonthExpense={currentMonthExpense}
+        currentMonthBalance={currentMonthBalance}
+        accounts={accounts}
+        accountBalances={accountBalances}
+        budgetStatus={budgetStatus}
+      />
 
       <FinancialAlerts budgetStatus={budgetStatus} currentMonthBalance={currentMonthBalance} />
 

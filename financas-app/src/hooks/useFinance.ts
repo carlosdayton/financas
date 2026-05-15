@@ -1,389 +1,33 @@
-import { useState, useEffect, useCallback } from 'react';
-import type { 
-  Transaction, 
-  Category, 
-  FinancialSummary, 
-  MonthlyData, 
-  Goal, 
-  Account, 
-  RecurringTransaction,
-  Budget,
-  BudgetStatus
-} from '../types/finance';
+import { useCallback } from 'react';
 import type { FinanceBackupData } from '../types/backup';
-import { getTodayLocalISO } from '../utils/date';
-
-const TRANSACTIONS_KEY = 'financas_transactions';
-const CATEGORIES_KEY = 'financas_categories';
-const GOALS_KEY = 'financas_goals';
-const ACCOUNTS_KEY = 'financas_accounts';
-const RECURRING_KEY = 'financas_recurring';
-const BUDGETS_KEY = 'financas_budgets';
-
-const defaultCategories: Category[] = [
-  { id: '1', name: 'Salário', type: 'income', color: '#22c55e', icon: 'wallet' },
-  { id: '2', name: 'Freelance', type: 'income', color: '#16a34a', icon: 'briefcase' },
-  { id: '3', name: 'Investimentos', type: 'income', color: '#15803d', icon: 'trending-up' },
-  { id: '4', name: 'Alimentação', type: 'expense', color: '#ef4444', icon: 'utensils' },
-  { id: '5', name: 'Transporte', type: 'expense', color: '#f97316', icon: 'car' },
-  { id: '6', name: 'Moradia', type: 'expense', color: '#eab308', icon: 'home' },
-  { id: '7', name: 'Saúde', type: 'expense', color: '#ec4899', icon: 'heart' },
-  { id: '8', name: 'Lazer', type: 'expense', color: '#8b5cf6', icon: 'gamepad-2' },
-  { id: '9', name: 'Educação', type: 'expense', color: '#3b82f6', icon: 'graduation-cap' },
-  { id: '10', name: 'Outros', type: 'expense', color: '#6b7280', icon: 'more-horizontal' },
-];
-
-const defaultAccounts: Account[] = [
-  { id: '1', name: 'Conta Principal', type: 'checking', balance: 0, color: '#6366f1', icon: 'wallet', isDefault: true },
-];
-
-function readStoredValue<T>(key: string, fallback: T): T {
-  const stored = localStorage.getItem(key);
-  if (!stored) return fallback;
-
-  try {
-    return JSON.parse(stored) as T;
-  } catch {
-    return fallback;
-  }
-}
+import { useTransactions } from './useTransactions';
+import { useCategories, defaultCategories } from './useCategories';
+import { useGoals } from './useGoals';
+import { useAccounts, defaultAccounts } from './useAccounts';
+import { useRecurring } from './useRecurring';
+import { useBudgets } from './useBudgets';
 
 export function useFinance() {
-  const [transactions, setTransactions] = useState<Transaction[]>(() => readStoredValue(TRANSACTIONS_KEY, []));
-  const [categories, setCategories] = useState<Category[]>(() => readStoredValue(CATEGORIES_KEY, defaultCategories));
-  const [goals, setGoals] = useState<Goal[]>(() => readStoredValue(GOALS_KEY, []));
-  const [accounts, setAccounts] = useState<Account[]>(() => readStoredValue(ACCOUNTS_KEY, defaultAccounts));
-  const [recurring, setRecurring] = useState<RecurringTransaction[]>(() => readStoredValue(RECURRING_KEY, []));
-  const [budgets, setBudgets] = useState<Budget[]>(() => readStoredValue(BUDGETS_KEY, []));
-  const [isLoaded] = useState(true);
+  const {
+    transactions, setTransactions,
+    addTransaction, deleteTransaction, updateTransaction, transferBetweenAccounts,
+    getSummary, getMonthlyData, getCategoryData, getTransactionsByMonth, getAccountBalance,
+  } = useTransactions();
 
-  // Save to localStorage whenever data changes
-  useEffect(() => {
-    if (isLoaded) localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(transactions));
-  }, [transactions, isLoaded]);
-
-  useEffect(() => {
-    if (isLoaded) localStorage.setItem(CATEGORIES_KEY, JSON.stringify(categories));
-  }, [categories, isLoaded]);
-
-  useEffect(() => {
-    if (isLoaded) localStorage.setItem(GOALS_KEY, JSON.stringify(goals));
-  }, [goals, isLoaded]);
-
-  useEffect(() => {
-    if (isLoaded) localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
-  }, [accounts, isLoaded]);
-
-  useEffect(() => {
-    if (isLoaded) localStorage.setItem(RECURRING_KEY, JSON.stringify(recurring));
-  }, [recurring, isLoaded]);
-
-  useEffect(() => {
-    if (isLoaded) localStorage.setItem(BUDGETS_KEY, JSON.stringify(budgets));
-  }, [budgets, isLoaded]);
-
-  // Process recurring transactions
-  useEffect(() => {
-    if (!isLoaded) return;
-
-    const today = getTodayLocalISO();
-    
-    recurring.forEach(rec => {
-      if (!rec.isActive) return;
-      if (rec.endDate && rec.endDate < today) return;
-      if (rec.lastGenerated && rec.lastGenerated >= today) return;
-
-      const lastGen = rec.lastGenerated ? new Date(rec.lastGenerated) : new Date(rec.startDate);
-      const todayDate = new Date(today);
-      
-      let shouldGenerate = false;
-      
-      switch (rec.frequency) {
-        case 'daily':
-          shouldGenerate = lastGen < todayDate;
-          break;
-        case 'weekly':
-          shouldGenerate = (todayDate.getTime() - lastGen.getTime()) >= 7 * 24 * 60 * 60 * 1000;
-          break;
-        case 'monthly':
-          shouldGenerate = lastGen.getMonth() !== todayDate.getMonth() || lastGen.getFullYear() !== todayDate.getFullYear();
-          break;
-        case 'yearly':
-          shouldGenerate = lastGen.getFullYear() !== todayDate.getFullYear();
-          break;
-      }
-
-      if (shouldGenerate) {
-        const newTransaction: Transaction = {
-          id: crypto.randomUUID(),
-          description: rec.description,
-          amount: rec.amount,
-          type: rec.type,
-          category: rec.category,
-          date: today,
-          createdAt: new Date().toISOString(),
-          accountId: rec.accountId,
-          isRecurring: true,
-          recurringId: rec.id,
-        };
-        setTransactions(prev => [newTransaction, ...prev]);
-        setRecurring(prev =>
-          prev.map(r => r.id === rec.id ? { ...r, lastGenerated: today } : r)
-        );
-      }
-    });
-  }, [isLoaded, recurring]);
-
-  const addTransaction = useCallback((transaction: Omit<Transaction, 'id' | 'createdAt'>) => {
-    const newTransaction: Transaction = {
-      ...transaction,
-      id: crypto.randomUUID(),
-      createdAt: new Date().toISOString(),
-    };
-    setTransactions(prev => [newTransaction, ...prev]);
-  }, []);
-
-  const deleteTransaction = useCallback((id: string) => {
-    setTransactions(prev => {
-      const transaction = prev.find(t => t.id === id);
-      if (transaction?.isTransfer && transaction.transferId) {
-        return prev.filter(t => t.transferId !== transaction.transferId);
-      }
-      return prev.filter(t => t.id !== id);
-    });
-  }, []);
-
-  const updateTransaction = useCallback((id: string, updates: Partial<Transaction>) => {
-    setTransactions(prev =>
-      prev.map(t => (t.id === id ? { ...t, ...updates } : t))
-    );
-  }, []);
-
-  // Goals
-  const addGoal = useCallback((goal: Omit<Goal, 'id' | 'createdAt' | 'currentAmount'>) => {
-    const newGoal: Goal = {
-      ...goal,
-      id: crypto.randomUUID(),
-      createdAt: new Date().toISOString(),
-      currentAmount: 0,
-    };
-    setGoals(prev => [...prev, newGoal]);
-  }, []);
-
-  const updateGoal = useCallback((id: string, updates: Partial<Goal>) => {
-    setGoals(prev => prev.map(g => g.id === id ? { ...g, ...updates } : g));
-  }, []);
-
-  const deleteGoal = useCallback((id: string) => {
-    setGoals(prev => prev.filter(g => g.id !== id));
-  }, []);
-
-  const contributeToGoal = useCallback((goalId: string, amount: number) => {
-    setGoals(prev =>
-      prev.map(g =>
-        g.id === goalId
-          ? { ...g, currentAmount: Math.min(g.currentAmount + amount, g.targetAmount) }
-          : g
-      )
-    );
-  }, []);
-
-  // Accounts
-  const addAccount = useCallback((account: Omit<Account, 'id'>) => {
-    const newAccount: Account = { ...account, id: crypto.randomUUID() };
-    setAccounts(prev => [...prev, newAccount]);
-  }, []);
-
-  const updateAccount = useCallback((id: string, updates: Partial<Account>) => {
-    setAccounts(prev => prev.map(a => a.id === id ? { ...a, ...updates } : a));
-  }, []);
-
-  const deleteAccount = useCallback((id: string) => {
-    setAccounts(prev => prev.filter(a => a.id !== id));
-  }, []);
+  const { categories, setCategories, addCategory, updateCategory, deleteCategory } = useCategories();
+  const { goals, setGoals, addGoal, updateGoal, deleteGoal, contributeToGoal } = useGoals();
+  const { accounts, setAccounts, addAccount, updateAccount, deleteAccount } = useAccounts();
+  const { recurring, setRecurring, addRecurring, updateRecurring, deleteRecurring } = useRecurring(setTransactions);
+  const { budgets, setBudgets, addBudget, updateBudget, deleteBudget, getBudgetStatus } = useBudgets(transactions);
 
   const reassignAccountReferences = useCallback((fromAccountId: string, toAccountId: string) => {
     setTransactions(prev =>
-      prev.map((transaction) =>
-        transaction.accountId === fromAccountId
-          ? { ...transaction, accountId: toAccountId }
-          : transaction
-      )
+      prev.map(t => t.accountId === fromAccountId ? { ...t, accountId: toAccountId } : t)
     );
     setRecurring(prev =>
-      prev.map((item) =>
-        item.accountId === fromAccountId
-          ? { ...item, accountId: toAccountId }
-          : item
-      )
+      prev.map(r => r.accountId === fromAccountId ? { ...r, accountId: toAccountId } : r)
     );
-  }, []);
-
-  // Recurring
-  const addRecurring = useCallback((rec: Omit<RecurringTransaction, 'id'>) => {
-    const newRecurring: RecurringTransaction = { ...rec, id: crypto.randomUUID() };
-    setRecurring(prev => [...prev, newRecurring]);
-  }, []);
-
-  const updateRecurring = useCallback((id: string, updates: Partial<RecurringTransaction>) => {
-    setRecurring(prev => prev.map(r => r.id === id ? { ...r, ...updates } : r));
-  }, []);
-
-  const deleteRecurring = useCallback((id: string) => {
-    setRecurring(prev => prev.filter(r => r.id !== id));
-  }, []);
-
-  const transferBetweenAccounts = useCallback((data: {
-    fromAccountId: string;
-    toAccountId: string;
-    amount: number;
-    date?: string;
-    description?: string;
-  }) => {
-    const date = data.date || getTodayLocalISO();
-    const transferId = crypto.randomUUID();
-    const baseDescription = data.description?.trim() || 'Transferencia entre contas';
-
-    const outgoing: Transaction = {
-      id: crypto.randomUUID(),
-      description: baseDescription,
-      amount: data.amount,
-      type: 'expense',
-      category: 'Transferencia interna',
-      date,
-      createdAt: new Date().toISOString(),
-      accountId: data.fromAccountId,
-      isTransfer: true,
-      transferId,
-      transferDirection: 'out',
-    };
-
-    const incoming: Transaction = {
-      id: crypto.randomUUID(),
-      description: baseDescription,
-      amount: data.amount,
-      type: 'income',
-      category: 'Transferencia interna',
-      date,
-      createdAt: new Date().toISOString(),
-      accountId: data.toAccountId,
-      isTransfer: true,
-      transferId,
-      transferDirection: 'in',
-    };
-
-    setTransactions(prev => [incoming, outgoing, ...prev]);
-  }, []);
-
-  // Budgets
-  const addBudget = useCallback((budget: Omit<Budget, 'id' | 'createdAt'>) => {
-    const newBudget: Budget = {
-      ...budget,
-      id: crypto.randomUUID(),
-      createdAt: new Date().toISOString(),
-    };
-    setBudgets(prev => [...prev.filter(b => !(b.category === budget.category && b.month === budget.month)), newBudget]);
-  }, []);
-
-  const updateBudget = useCallback((id: string, updates: Partial<Budget>) => {
-    setBudgets(prev => prev.map(b => b.id === id ? { ...b, ...updates } : b));
-  }, []);
-
-  const deleteBudget = useCallback((id: string) => {
-    setBudgets(prev => prev.filter(b => b.id !== id));
-  }, []);
-
-  const getSummary = useCallback((): FinancialSummary => {
-    const totalIncome = transactions
-      .filter(t => t.type === 'income' && !t.isTransfer)
-      .reduce((sum, t) => sum + t.amount, 0);
-    
-    const totalExpense = transactions
-      .filter(t => t.type === 'expense' && !t.isTransfer)
-      .reduce((sum, t) => sum + t.amount, 0);
-
-    return {
-      totalIncome,
-      totalExpense,
-      balance: totalIncome - totalExpense,
-      transactionsCount: transactions.length,
-    };
-  }, [transactions]);
-
-  const getMonthlyData = useCallback((): MonthlyData[] => {
-    const monthlyMap = new Map<string, { income: number; expense: number }>();
-
-    transactions.filter(transaction => !transaction.isTransfer).forEach(transaction => {
-      const month = transaction.date.substring(0, 7);
-      const current = monthlyMap.get(month) || { income: 0, expense: 0 };
-      
-      if (transaction.type === 'income') {
-        current.income += transaction.amount;
-      } else {
-        current.expense += transaction.amount;
-      }
-      
-      monthlyMap.set(month, current);
-    });
-
-    return Array.from(monthlyMap.entries())
-      .map(([month, data]) => ({
-        month,
-        income: data.income,
-        expense: data.expense,
-        balance: data.income - data.expense,
-      }))
-      .sort((a, b) => a.month.localeCompare(b.month))
-      .slice(-12);
-  }, [transactions]);
-
-  const getCategoryData = useCallback((type: 'income' | 'expense') => {
-    const categoryMap = new Map<string, number>();
-
-    transactions
-      .filter(t => t.type === type && !t.isTransfer)
-      .forEach(transaction => {
-        const current = categoryMap.get(transaction.category) || 0;
-        categoryMap.set(transaction.category, current + transaction.amount);
-      });
-
-    return Array.from(categoryMap.entries())
-      .map(([name, value]) => ({ name, value }))
-      .sort((a, b) => b.value - a.value);
-  }, [transactions]);
-
-  const getTransactionsByMonth = useCallback((yearMonth: string) => {
-    return transactions.filter(t => t.date.startsWith(yearMonth));
-  }, [transactions]);
-
-  const getAccountBalance = useCallback((accountId: string) => {
-    return transactions
-      .filter(t => t.accountId === accountId || (!t.accountId && accountId === '1'))
-      .reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
-  }, [transactions]);
-
-  const getBudgetStatus = useCallback((month: string): BudgetStatus[] => {
-    const monthBudgets = budgets.filter(b => b.month === month);
-
-    return monthBudgets
-      .map((budget) => {
-        const spent = transactions
-          .filter(t => t.type === 'expense' && t.category === budget.category && t.date.startsWith(month))
-          .reduce((sum, t) => sum + t.amount, 0);
-
-        const remaining = budget.amount - spent;
-        const percentage = budget.amount > 0 ? (spent / budget.amount) * 100 : 0;
-
-        return {
-          budget,
-          spent,
-          remaining,
-          percentage,
-          isExceeded: spent > budget.amount,
-        };
-      })
-      .sort((a, b) => b.percentage - a.percentage);
-  }, [budgets, transactions]);
+  }, [setTransactions, setRecurring]);
 
   const replaceAllData = useCallback((data: FinanceBackupData) => {
     setTransactions(data.transactions);
@@ -392,7 +36,7 @@ export function useFinance() {
     setAccounts(data.accounts.length > 0 ? data.accounts : defaultAccounts);
     setRecurring(data.recurring);
     setBudgets(data.budgets);
-  }, []);
+  }, [setTransactions, setCategories, setGoals, setAccounts, setRecurring, setBudgets]);
 
   return {
     transactions,
@@ -401,10 +45,13 @@ export function useFinance() {
     accounts,
     recurring,
     budgets,
-    isLoaded,
+    isLoaded: true,
     addTransaction,
     deleteTransaction,
     updateTransaction,
+    addCategory,
+    updateCategory,
+    deleteCategory,
     addGoal,
     updateGoal,
     deleteGoal,

@@ -114,7 +114,7 @@ export function ExpenseHeatmap({ transactions }: ExpenseHeatmapProps) {
       <div className="relative bg-[#16162a] rounded-2xl border border-[#2a2a45] p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-gradient-to-br from-rose-500/20 to-orange-500/20 rounded-lg">
+            <div className="p-2 bg-gradient-to-br from-rose-500/20 to-orange-500/20 rounded-2xl">
               <Flame className="w-5 h-5 text-rose-400" />
             </div>
             <div>
@@ -160,7 +160,7 @@ export function ExpenseHeatmap({ transactions }: ExpenseHeatmapProps) {
                   {week.map((day) => (
                     <div
                       key={day.date}
-                      className={`relative aspect-square rounded-lg flex flex-col items-center justify-center transition-all hover:scale-110 cursor-pointer group ${
+                      className={`relative aspect-square rounded-2xl flex flex-col items-center justify-center transition-all hover:scale-110 cursor-pointer group ${
                         getIntensityColor(day.amount, stats?.maxAmount || 1)
                       }`}
                       title={`Dia ${day.day}: ${formatCurrency(day.amount)} em ${day.count} transacoes`}
@@ -172,7 +172,7 @@ export function ExpenseHeatmap({ transactions }: ExpenseHeatmapProps) {
                         </span>
                       )}
 
-                      <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-3 py-2 bg-[#1a1a2e] border border-[#2a2a45] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 whitespace-nowrap">
+                      <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-3 py-2 bg-[#1a1a2e] border border-[#2a2a45] rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 whitespace-nowrap">
                         <p className="text-xs text-white font-medium">Dia {day.day}</p>
                         <p className="text-xs text-[#a0a0b8]">{formatCurrency(day.amount)}</p>
                         <p className="text-xs text-[#6b6b8a]">{day.count} transacoes</p>

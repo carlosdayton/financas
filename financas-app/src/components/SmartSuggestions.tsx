@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Brain, Sparkles, TrendingUp, AlertTriangle, X, Lightbulb, Repeat } from 'lucide-react';
+import { Brain, TrendingUp, AlertTriangle, X, Lightbulb, Repeat } from 'lucide-react';
 import { usePatternDetection } from '../hooks/usePatternDetection';
 import type { Transaction } from '../types/finance';
 
@@ -11,7 +11,7 @@ interface SmartSuggestionsProps {
 export function SmartSuggestions({ transactions, onCreateRecurring }: SmartSuggestionsProps) {
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
   const { patterns, predictSpending } = usePatternDetection(transactions);
-  
+
   const activePatterns = patterns.filter(p => !dismissed.has(p.description));
   const predictions = predictSpending().slice(0, 3);
 
@@ -21,78 +21,65 @@ export function SmartSuggestions({ transactions, onCreateRecurring }: SmartSugge
 
   if (transactions.length < 3) {
     return (
-      <div className="rounded-2xl p-6 mb-6" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 rounded-lg bg-indigo-500/20">
-            <Brain className="w-5 h-5 text-indigo-400" />
+      <div className="rounded-2xl p-5 mb-6 glass" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
+        <div className="flex items-center gap-3 mb-3">
+          <div className="p-2 bg-emerald-500 text-white rounded-2xl">
+            <Brain className="w-5 h-5 text-black" />
           </div>
-          <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Sugestões Inteligentes</h3>
+          <h3 className="text-xl font-display font-semibold" style={{ color: 'var(--text-primary)' }}>Sugestões</h3>
         </div>
         <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-          Adicione mais transações para receber sugestões personalizadas de automação.
+          Adicione mais transações para receber sugestões de automação.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 mb-6">
-      {/* Header */}
+    <div className="space-y-5 mb-6">
       <div className="flex items-center gap-3">
-        <div className="p-2 rounded-lg bg-gradient-to-br from-indigo-500/20 to-purple-500/20">
-          <Sparkles className="w-5 h-5 text-indigo-400" />
+        <div className="p-2 bg-emerald-500 text-white rounded-2xl">
+          <Brain className="w-5 h-5 text-black" />
         </div>
-        <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Automação Inteligente</h3>
+        <h3 className="text-xl font-display font-semibold" style={{ color: 'var(--text-primary)' }}>Automação</h3>
         {(activePatterns.length > 0 || predictions.length > 0) && (
-          <span className="ml-auto text-xs px-2 py-1 rounded-full bg-indigo-500/20 text-indigo-400">
+          <span className="ml-auto text-sm font-medium px-3 py-1 rounded-2xl" style={{ background: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}>
             {activePatterns.length + predictions.length} sugestões
           </span>
         )}
       </div>
 
-      {/* Detected Patterns */}
       {activePatterns.length > 0 && (
         <div className="space-y-3">
-          <h4 className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Padrões Detectados</h4>
+          <h4 className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Padrões detectados</h4>
           {activePatterns.map((pattern, index) => (
-            <div
-              key={index}
-              className="relative rounded-xl p-4 transition-all hover:scale-[1.01]"
-              style={{ 
-                background: 'var(--bg-card)', 
-                border: '1px solid var(--border-color)',
-                borderLeft: `4px solid ${pattern.type === 'recurring' ? '#6366f1' : '#f59e0b'}`
-              }}
-            >
+            <div key={index} className="rounded-2xl p-4 glass" style={{ borderLeft: `3px solid ${pattern.type === 'recurring' ? 'var(--accent-secondary)' : 'var(--accent-warning)'}` }}>
               <div className="flex items-start gap-3">
-                <div className={`p-2 rounded-lg ${pattern.type === 'recurring' ? 'bg-indigo-500/20' : 'bg-amber-500/20'}`}>
-                  {pattern.type === 'recurring' ? (
-                    <Repeat className="w-5 h-5 text-indigo-400" />
-                  ) : (
-                    <AlertTriangle className="w-5 h-5 text-amber-400" />
-                  )}
+                <div className="p-2 rounded-2xl" style={{ background: 'var(--bg-tertiary)', color: pattern.type === 'recurring' ? 'var(--accent-secondary)' : 'var(--accent-warning)' }}>
+                  {pattern.type === 'recurring' ? <Repeat className="w-5 h-5" /> : <AlertTriangle className="w-5 h-5" />}
                 </div>
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex items-center gap-3 mb-1">
                     <h5 className="font-medium" style={{ color: 'var(--text-primary)' }}>{pattern.description}</h5>
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400">
-                      {pattern.confidence.toFixed(0)}% confiança
+                    <span className="text-xs px-2 py-0.5 rounded-2xl" style={{ background: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}>
+                      {pattern.confidence.toFixed(0)}%
                     </span>
                   </div>
                   <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>{pattern.suggestion}</p>
-                  
+
                   {pattern.type === 'recurring' && onCreateRecurring && (
                     <button
                       onClick={() => onCreateRecurring(pattern.transactions[0])}
-                      className="text-sm px-3 py-1.5 bg-indigo-500/20 text-indigo-400 rounded-lg hover:bg-indigo-500/30 transition-colors"
+                      className="text-sm font-medium px-3 py-2 rounded-2xl transition-colors"
+                      style={{ background: 'var(--bg-tertiary)', color: 'var(--accent-secondary)' }}
                     >
-                      Criar Recorrente
+                      Criar recorrente
                     </button>
                   )}
                 </div>
                 <button
                   onClick={() => handleDismiss(pattern.description)}
-                  className="p-1 rounded-lg hover:bg-red-500/20 transition-colors"
+                  className="p-1.5 rounded-2xl transition-colors"
                   style={{ color: 'var(--text-muted)' }}
                 >
                   <X className="w-4 h-4" />
@@ -103,36 +90,33 @@ export function SmartSuggestions({ transactions, onCreateRecurring }: SmartSugge
         </div>
       )}
 
-      {/* Spending Predictions */}
       {predictions.length > 0 && (
         <div className="space-y-3">
-          <h4 className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Previsões de Gastos</h4>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <h4 className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Previsões de gastos</h4>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {predictions.map((prediction, index) => (
-              <div
-                key={index}
-                className="rounded-xl p-4"
-                style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}
-              >
-                <div className="flex items-center gap-2 mb-2">
-                  <TrendingUp className={`w-4 h-4 ${
-                    prediction.trend === 'increasing' ? 'text-red-400' :
-                    prediction.trend === 'decreasing' ? 'text-emerald-400' :
-                    'text-blue-400'
-                  }`} />
-                  <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{prediction.category}</span>
+              <div key={index} className="rounded-2xl p-4 glass">
+                <div className="flex items-center gap-2 mb-3">
+                  <TrendingUp
+                    className="w-4 h-4"
+                    style={{
+                      color: prediction.trend === 'increasing'
+                        ? 'var(--accent-danger)'
+                        : prediction.trend === 'decreasing'
+                        ? 'var(--accent-success)'
+                        : 'var(--accent-secondary)'
+                    }}
+                  />
+                  <span className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>{prediction.category}</span>
                 </div>
-                <p className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
+                <p className="text-xl font-mono font-semibold tracking-tight" style={{ color: 'var(--text-primary)' }}>
                   {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(prediction.predictedAmount)}
                 </p>
-                <div className="flex items-center gap-2 mt-2">
-                  <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--bg-tertiary)' }}>
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-500"
-                      style={{ width: `${prediction.confidence}%` }}
-                    />
+                <div className="flex items-center gap-3 mt-3">
+                  <div className="flex-1 h-1.5 rounded-2xl overflow-hidden" style={{ background: 'var(--bg-tertiary)' }}>
+                    <div className="h-full rounded-2xl" style={{ width: `${prediction.confidence}%`, background: 'var(--accent-primary)' }} />
                   </div>
-                  <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{prediction.confidence.toFixed(0)}%</span>
+                  <span className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>{prediction.confidence.toFixed(0)}%</span>
                 </div>
               </div>
             ))}
@@ -140,15 +124,15 @@ export function SmartSuggestions({ transactions, onCreateRecurring }: SmartSugge
         </div>
       )}
 
-      {/* Tips */}
-      <div className="rounded-xl p-4" style={{ background: 'var(--bg-tertiary)' }}>
+      <div className="rounded-2xl p-4 glass">
         <div className="flex items-start gap-3">
-          <Lightbulb className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+          <div className="p-2 rounded-2xl flex-shrink-0" style={{ background: 'var(--bg-tertiary)', color: 'var(--accent-warning)' }}>
+            <Lightbulb className="w-5 h-5" />
+          </div>
           <div>
-            <h4 className="font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Dica de Automação</h4>
-            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-              O sistema aprende com suas transações e sugere padrões recorrentes automaticamente. 
-              Quanto mais você usa, mais inteligentes ficam as sugestões!
+            <h4 className="font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Dica de automação</h4>
+            <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+              O app identifica padrões recorrentes conforme você registra suas transações.
             </p>
           </div>
         </div>
@@ -157,18 +141,16 @@ export function SmartSuggestions({ transactions, onCreateRecurring }: SmartSugge
   );
 }
 
-// Category suggestion helper component
-export function CategorySuggestion({ 
-  description, 
-  onSuggest 
-}: { 
-  description: string; 
+export function CategorySuggestion({
+  description,
+  onSuggest
+}: {
+  description: string;
   onSuggest: (category: string) => void;
 }) {
   const { suggestCategory } = usePatternDetection([]);
   const [suggestedCategory, setSuggestedCategory] = useState<string | null>(null);
-  
-  // Get suggestion when description changes
+
   useState(() => {
     if (description.length > 2) {
       const category = suggestCategory(description);
@@ -181,7 +163,8 @@ export function CategorySuggestion({
   return (
     <button
       onClick={() => onSuggest(suggestedCategory)}
-      className="flex items-center gap-2 text-sm px-3 py-1.5 rounded-lg bg-indigo-500/20 text-indigo-400 hover:bg-indigo-500/30 transition-colors"
+      className="flex items-center gap-2 text-sm px-3 py-1.5 rounded-2xl transition-colors"
+      style={{ background: 'var(--bg-tertiary)', color: 'var(--accent-secondary)' }}
     >
       <Brain className="w-4 h-4" />
       Sugerir: {suggestedCategory}

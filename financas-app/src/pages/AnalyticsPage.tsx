@@ -1,22 +1,28 @@
 import { AdvancedCharts } from '../components/AdvancedCharts';
 import { ExpenseHeatmap } from '../components/ExpenseHeatmap';
-import type { Transaction, Goal } from '../types/finance';
+import { CashFlowProjection } from '../components/CashFlowProjection';
+import type { Transaction, Goal, RecurringTransaction, Installment, InstallmentPayment } from '../types/finance';
 
 interface AnalyticsPageProps {
   transactions: Transaction[];
   goals: Goal[];
+  recurring: RecurringTransaction[];
+  installments: Installment[];
+  payments: InstallmentPayment[];
+  accountBalances: Record<string, number>;
 }
 
-export function AnalyticsPage({ transactions, goals }: AnalyticsPageProps) {
-  // goals prop is available for future use
+export function AnalyticsPage({ transactions, goals, recurring, installments, payments, accountBalances }: AnalyticsPageProps) {
   void goals;
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-white">Análises</h2>
-        <p className="text-[#a0a0b8]">Gráficos e insights detalhados</p>
-      </div>
-
+      <CashFlowProjection
+        transactions={transactions}
+        recurring={recurring}
+        installments={installments}
+        payments={payments}
+        accountBalances={accountBalances}
+      />
       <AdvancedCharts transactions={transactions} />
       <ExpenseHeatmap transactions={transactions} />
     </div>

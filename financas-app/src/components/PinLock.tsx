@@ -123,13 +123,13 @@ export function PinLock({
             <div className="space-y-4">
               <button
                 onClick={() => setIsSettingUp(true)}
-                className="w-full py-3 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl font-medium hover:opacity-90 transition-opacity"
+                className="w-full py-3 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-2xl font-medium hover:opacity-90 transition-opacity"
               >
                 Configurar PIN
               </button>
               <button
                 onClick={() => setIsSettingUp(false)}
-                className="w-full py-3 rounded-xl font-medium transition-colors"
+                className="w-full py-3 rounded-2xl font-medium transition-colors"
                 style={{ background: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}
               >
                 Pular por enquanto
@@ -148,7 +148,7 @@ export function PinLock({
                   maxLength={6}
                   value={pin}
                   onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
-                  className="w-full px-4 py-3 text-center text-2xl tracking-widest rounded-xl border outline-none focus:ring-2 focus:ring-indigo-500/50"
+                  className="w-full px-4 py-3 text-center text-2xl tracking-widest rounded-2xl border outline-none focus:ring-2 focus:ring-indigo-500/50"
                   style={{ background: 'var(--bg-tertiary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
                   placeholder="••••"
                   autoFocus
@@ -166,7 +166,7 @@ export function PinLock({
                   maxLength={6}
                   value={confirmPin}
                   onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, ''))}
-                  className="w-full px-4 py-3 text-center text-2xl tracking-widest rounded-xl border outline-none focus:ring-2 focus:ring-indigo-500/50"
+                  className="w-full px-4 py-3 text-center text-2xl tracking-widest rounded-2xl border outline-none focus:ring-2 focus:ring-indigo-500/50"
                   style={{ background: 'var(--bg-tertiary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
                   placeholder="••••"
                 />
@@ -182,7 +182,7 @@ export function PinLock({
               <button
                 onClick={handleSetup}
                 disabled={pin.length < 4 || confirmPin.length < 4 || isSubmitting}
-                className="w-full py-3 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
+                className="w-full py-3 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-2xl font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
               >
                 {isSubmitting ? 'Salvando...' : 'Confirmar'}
               </button>
@@ -194,7 +194,7 @@ export function PinLock({
                   setConfirmPin('');
                   setError('');
                 }}
-                className="w-full py-3 rounded-xl font-medium transition-colors"
+                className="w-full py-3 rounded-2xl font-medium transition-colors"
                 style={{ background: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}
               >
                 Voltar
@@ -240,7 +240,7 @@ export function PinLock({
               {[0, 1, 2, 3, 4, 5].map((i) => (
                 <div
                   key={i}
-                  className={`w-4 h-4 rounded-full transition-all ${
+                  className={`w-4 h-4 rounded-2xl transition-all ${
                     i < pin.length ? 'bg-indigo-500 scale-110' : 'bg-gray-600'
                   }`}
                 />
@@ -259,7 +259,7 @@ export function PinLock({
                 <button
                   key={num}
                   onClick={() => handleKeyPress(num.toString())}
-                  className="aspect-square rounded-xl text-2xl font-medium transition-all hover:scale-105 active:scale-95"
+                  className="aspect-square rounded-2xl text-2xl font-medium transition-all hover:scale-105 active:scale-95"
                   style={{ background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}
                 >
                   {num}
@@ -267,14 +267,14 @@ export function PinLock({
               ))}
               <button
                 onClick={handleBackspace}
-                className="aspect-square rounded-xl flex items-center justify-center transition-all hover:scale-105 active:scale-95"
+                className="aspect-square rounded-2xl flex items-center justify-center transition-all hover:scale-105 active:scale-95"
                 style={{ background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}
               >
                 <X className="w-6 h-6" />
               </button>
               <button
                 onClick={() => handleKeyPress('0')}
-                className="aspect-square rounded-xl text-2xl font-medium transition-all hover:scale-105 active:scale-95"
+                className="aspect-square rounded-2xl text-2xl font-medium transition-all hover:scale-105 active:scale-95"
                 style={{ background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}
               >
                 0
@@ -282,7 +282,7 @@ export function PinLock({
               <button
                 onClick={handleVerify}
                 disabled={pin.length < 4 || isSubmitting}
-                className="aspect-square rounded-xl flex items-center justify-center bg-gradient-to-r from-indigo-500 to-purple-500 text-white transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
+                className="aspect-square rounded-2xl flex items-center justify-center bg-gradient-to-r from-indigo-500 to-purple-500 text-white transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
               >
                 <Unlock className="w-6 h-6" />
               </button>

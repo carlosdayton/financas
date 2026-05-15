@@ -72,7 +72,7 @@ export function Budgets({
       <div className="relative rounded-2xl p-6 space-y-6" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-bold flex items-center gap-3" style={{ color: 'var(--text-primary)' }}>
-            <div className="p-2 bg-gradient-to-br from-emerald-500/20 to-indigo-500/20 rounded-lg">
+            <div className="p-2 bg-gradient-to-br from-emerald-500/20 to-indigo-500/20 rounded-2xl">
               <PiggyBank className="w-5 h-5 text-emerald-400" />
             </div>
             Orçamento Mensal
@@ -81,14 +81,14 @@ export function Budgets({
             <button
               onClick={onCopyFromPreviousMonth}
               disabled={!canCopyFromPreviousMonth}
-              className="px-4 py-2 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}
             >
               Copiar mes anterior
             </button>
             <button
               onClick={() => setIsAdding((prev) => !prev)}
-              className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl transition-all"
+              className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-white rounded-2xl transition-all"
             >
               <Plus className="w-4 h-4" />
               Novo Limite
@@ -96,7 +96,7 @@ export function Budgets({
           </div>
         </div>
 
-        <div className="rounded-xl p-4" style={{ background: 'var(--bg-tertiary)' }}>
+        <div className="rounded-2xl p-4" style={{ background: 'var(--bg-tertiary)' }}>
           <div className="mb-3">
             <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
               Mes de referencia
@@ -105,7 +105,7 @@ export function Budgets({
               type="month"
               value={selectedMonth}
               onChange={(e) => onMonthChange(e.target.value)}
-              className="px-3 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+              className="px-3 py-2 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
               style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
             />
           </div>
@@ -131,7 +131,7 @@ export function Budgets({
         </div>
 
         {isAdding && (
-          <form onSubmit={handleCreate} className="rounded-xl p-4 space-y-4" style={{ background: 'var(--bg-tertiary)' }}>
+          <form onSubmit={handleCreate} className="rounded-2xl p-4 space-y-4" style={{ background: 'var(--bg-tertiary)' }}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
@@ -140,7 +140,7 @@ export function Budgets({
                 <select
                   value={newBudget.category}
                   onChange={(e) => setNewBudget({ ...newBudget, category: e.target.value })}
-                  className="w-full px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                  className="w-full px-4 py-2 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
                   style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
                   required
                 >
@@ -163,7 +163,7 @@ export function Budgets({
                   value={newBudget.amount}
                   onChange={(e) => setNewBudget({ ...newBudget, amount: e.target.value })}
                   placeholder="0,00"
-                  className="w-full px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                  className="w-full px-4 py-2 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
                   style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
                   required
                 />
@@ -173,14 +173,14 @@ export function Budgets({
             <div className="flex gap-3">
               <button
                 type="submit"
-                className="flex-1 py-2 bg-gradient-to-r from-emerald-500 to-indigo-500 text-white font-medium rounded-xl hover:from-emerald-400 hover:to-indigo-400 transition-all"
+                className="flex-1 py-2 bg-gradient-to-r from-emerald-500 to-indigo-500 text-white font-medium rounded-2xl hover:from-emerald-400 hover:to-indigo-400 transition-all"
               >
                 Salvar limite
               </button>
               <button
                 type="button"
                 onClick={() => setIsAdding(false)}
-                className="px-4 py-2 rounded-xl transition-all"
+                className="px-4 py-2 rounded-2xl transition-all"
                 style={{ background: 'var(--bg-secondary)', color: 'var(--text-secondary)' }}
               >
                 Cancelar
@@ -203,7 +203,7 @@ export function Budgets({
               const isWarning = item.percentage >= 80 && !item.isExceeded;
 
               return (
-                <div key={item.budget.id} className="rounded-xl p-4 group" style={{ background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)' }}>
+                <div key={item.budget.id} className="rounded-2xl p-4 group" style={{ background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)' }}>
                   <div className="flex items-start justify-between mb-3">
                     <div>
                       <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>{item.budget.category}</h3>
@@ -213,7 +213,7 @@ export function Budgets({
                     </div>
                     <button
                       onClick={() => onDeleteBudget(item.budget.id)}
-                      className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-red-500/10 hover:text-red-400"
+                      className="p-1.5 rounded-2xl opacity-0 group-hover:opacity-100 transition-all hover:bg-red-500/10 hover:text-red-400"
                       style={{ color: 'var(--text-muted)' }}
                     >
                       <Trash2 className="w-4 h-4" />
@@ -229,7 +229,7 @@ export function Budgets({
                     </span>
                   </div>
 
-                  <div className="h-2 rounded-full overflow-hidden mb-2" style={{ background: 'var(--bg-secondary)' }}>
+                  <div className="h-2 rounded-2xl overflow-hidden mb-2" style={{ background: 'var(--bg-secondary)' }}>
                     <div
                       className={`h-full ${item.isExceeded ? 'bg-red-500' : isWarning ? 'bg-amber-500' : 'bg-emerald-500'} transition-all`}
                       style={{ width: `${progress}%` }}

@@ -94,7 +94,7 @@ export function Installments({
       <div className="flex justify-end">
         <button
           onClick={() => setIsAdding(!isAdding)}
-          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl font-medium hover:opacity-90 transition-opacity"
+          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-2xl font-medium hover:opacity-90 transition-opacity"
         >
           <Plus className="w-5 h-5" />
           Novo Parcelamento
@@ -105,7 +105,7 @@ export function Installments({
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="relative rounded-2xl p-5" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 rounded-lg bg-indigo-500/20">
+            <div className="p-2 rounded-2xl bg-indigo-500/20">
               <CreditCard className="w-5 h-5 text-indigo-400" />
             </div>
             <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>Ativos</span>
@@ -115,7 +115,7 @@ export function Installments({
 
         <div className="relative rounded-2xl p-5" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 rounded-lg bg-emerald-500/20">
+            <div className="p-2 rounded-2xl bg-emerald-500/20">
               <DollarSign className="w-5 h-5 text-emerald-400" />
             </div>
             <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>Valor Restante</span>
@@ -127,7 +127,7 @@ export function Installments({
 
         <div className="relative rounded-2xl p-5" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 rounded-lg bg-amber-500/20">
+            <div className="p-2 rounded-2xl bg-amber-500/20">
               <Calendar className="w-5 h-5 text-amber-400" />
             </div>
             <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>Concluídos</span>
@@ -149,7 +149,7 @@ export function Installments({
                 value={newInstallment.description}
                 onChange={(e) => setNewInstallment({ ...newInstallment, description: e.target.value })}
                 placeholder="Ex: iPhone 15 Pro"
-                className="w-full px-4 py-2 rounded-xl border outline-none focus:ring-2 focus:ring-indigo-500/50"
+                className="w-full px-4 py-2 rounded-2xl border outline-none focus:ring-2 focus:ring-indigo-500/50"
                 style={{ background: 'var(--bg-tertiary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
                 required
               />
@@ -160,7 +160,7 @@ export function Installments({
               <select
                 value={newInstallment.category}
                 onChange={(e) => setNewInstallment({ ...newInstallment, category: e.target.value })}
-                className="w-full px-4 py-2 rounded-xl border outline-none focus:ring-2 focus:ring-indigo-500/50"
+                className="w-full px-4 py-2 rounded-2xl border outline-none focus:ring-2 focus:ring-indigo-500/50"
                 style={{ background: 'var(--bg-tertiary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
               >
                 {CATEGORIES.map(cat => (
@@ -177,7 +177,7 @@ export function Installments({
                 value={newInstallment.totalAmount}
                 onChange={(e) => setNewInstallment({ ...newInstallment, totalAmount: e.target.value })}
                 placeholder="R$ 0,00"
-                className="w-full px-4 py-2 rounded-xl border outline-none focus:ring-2 focus:ring-indigo-500/50"
+                className="w-full px-4 py-2 rounded-2xl border outline-none focus:ring-2 focus:ring-indigo-500/50"
                 style={{ background: 'var(--bg-tertiary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
                 required
               />
@@ -191,7 +191,7 @@ export function Installments({
                 value={newInstallment.installmentAmount}
                 onChange={(e) => setNewInstallment({ ...newInstallment, installmentAmount: e.target.value })}
                 placeholder="R$ 0,00"
-                className="w-full px-4 py-2 rounded-xl border outline-none focus:ring-2 focus:ring-indigo-500/50"
+                className="w-full px-4 py-2 rounded-2xl border outline-none focus:ring-2 focus:ring-indigo-500/50"
                 style={{ background: 'var(--bg-tertiary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
                 required
               />
@@ -204,7 +204,7 @@ export function Installments({
                 value={newInstallment.totalInstallments}
                 onChange={(e) => setNewInstallment({ ...newInstallment, totalInstallments: e.target.value })}
                 placeholder="12"
-                className="w-full px-4 py-2 rounded-xl border outline-none focus:ring-2 focus:ring-indigo-500/50"
+                className="w-full px-4 py-2 rounded-2xl border outline-none focus:ring-2 focus:ring-indigo-500/50"
                 style={{ background: 'var(--bg-tertiary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
                 required
               />
@@ -216,7 +216,7 @@ export function Installments({
                 type="date"
                 value={newInstallment.startDate}
                 onChange={(e) => setNewInstallment({ ...newInstallment, startDate: e.target.value })}
-                className="w-full px-4 py-2 rounded-xl border outline-none focus:ring-2 focus:ring-indigo-500/50"
+                className="w-full px-4 py-2 rounded-2xl border outline-none focus:ring-2 focus:ring-indigo-500/50"
                 style={{ background: 'var(--bg-tertiary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
                 required
               />
@@ -226,14 +226,14 @@ export function Installments({
           <div className="flex gap-2 pt-2">
             <button
               type="submit"
-              className="px-6 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl font-medium hover:opacity-90 transition-opacity"
+              className="px-6 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-2xl font-medium hover:opacity-90 transition-opacity"
             >
               Criar Parcelamento
             </button>
             <button
               type="button"
               onClick={() => setIsAdding(false)}
-              className="px-6 py-2 rounded-xl font-medium transition-colors"
+              className="px-6 py-2 rounded-2xl font-medium transition-colors"
               style={{ background: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}
             >
               Cancelar
@@ -263,7 +263,7 @@ export function Installments({
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-3 rounded-xl bg-indigo-500/20">
+                  <div className="p-3 rounded-2xl bg-indigo-500/20">
                     <CreditCard className="w-6 h-6 text-indigo-400" />
                   </div>
                   <div>
@@ -273,7 +273,7 @@ export function Installments({
                 </div>
                 <button
                   onClick={() => onDeleteInstallment(inst.id)}
-                  className="p-2 rounded-lg transition-colors hover:bg-red-500/20"
+                  className="p-2 rounded-2xl transition-colors hover:bg-red-500/20"
                   style={{ color: 'var(--text-muted)' }}
                 >
                   <Trash2 className="w-5 h-5" />
@@ -290,7 +290,7 @@ export function Installments({
                     {getProgressPercentage(inst).toFixed(0)}%
                   </span>
                 </div>
-                <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--bg-tertiary)' }}>
+                <div className="h-2 rounded-2xl overflow-hidden" style={{ background: 'var(--bg-tertiary)' }}>
                   <div
                     className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all"
                     style={{ width: `${getProgressPercentage(inst)}%` }}
@@ -325,7 +325,7 @@ export function Installments({
                         key={payment.id}
                         onClick={() => !payment.isPaid && onPayInstallment(inst.id, payment.installmentNumber)}
                         disabled={payment.isPaid}
-                        className={`p-2 rounded-lg text-xs font-medium transition-all ${
+                        className={`p-2 rounded-2xl text-xs font-medium transition-all ${
                           payment.isPaid
                             ? 'bg-emerald-500/20 text-emerald-400 cursor-default'
                             : isOverdue
@@ -365,7 +365,7 @@ export function Installments({
                 style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}
               >
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-emerald-500/20">
+                  <div className="p-2 rounded-2xl bg-emerald-500/20">
                     <CheckCircle2 className="w-5 h-5 text-emerald-400" />
                   </div>
                   <div className="flex-1">
@@ -376,7 +376,7 @@ export function Installments({
                   </div>
                   <button
                     onClick={() => onDeleteInstallment(inst.id)}
-                    className="p-2 rounded-lg transition-colors hover:bg-red-500/20"
+                    className="p-2 rounded-2xl transition-colors hover:bg-red-500/20"
                     style={{ color: 'var(--text-muted)' }}
                   >
                     <Trash2 className="w-4 h-4" />

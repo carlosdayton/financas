@@ -87,14 +87,14 @@ export function RecurringTransactions({
       <div className="relative rounded-2xl p-6" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold flex items-center gap-3" style={{ color: 'var(--text-primary)' }}>
-            <div className="p-2 bg-gradient-to-br from-amber-500/20 to-orange-500/20 rounded-lg">
+            <div className="p-2 bg-gradient-to-br from-amber-500/20 to-orange-500/20 rounded-2xl">
               <Repeat className="w-5 h-5 text-amber-400" />
             </div>
             Transações Recorrentes
           </h2>
           <button
             onClick={() => setIsAdding(!isAdding)}
-            className="flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-white rounded-xl transition-all"
+            className="flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-white rounded-2xl transition-all"
           >
             <Plus className="w-4 h-4" />
             Nova Recorrência
@@ -102,12 +102,12 @@ export function RecurringTransactions({
         </div>
 
         {isAdding && (
-          <form onSubmit={handleSubmit} className="mb-6 p-4 rounded-xl space-y-4" style={{ background: 'var(--bg-tertiary)' }}>
+          <form onSubmit={handleSubmit} className="mb-6 p-4 rounded-2xl space-y-4" style={{ background: 'var(--bg-tertiary)' }}>
             <div className="flex gap-4 mb-4">
               <button
                 type="button"
                 onClick={() => setNewRecurring({ ...newRecurring, type: 'expense', category: '' })}
-                className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all ${
+                className={`flex-1 py-2 px-4 rounded-2xl font-medium transition-all ${
                   newRecurring.type === 'expense'
                     ? 'bg-red-500 text-white'
                     : ''
@@ -119,7 +119,7 @@ export function RecurringTransactions({
               <button
                 type="button"
                 onClick={() => setNewRecurring({ ...newRecurring, type: 'income', category: '' })}
-                className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all ${
+                className={`flex-1 py-2 px-4 rounded-2xl font-medium transition-all ${
                   newRecurring.type === 'income'
                     ? 'bg-emerald-500 text-white'
                     : ''
@@ -138,7 +138,7 @@ export function RecurringTransactions({
                   value={newRecurring.description}
                   onChange={(e) => setNewRecurring({ ...newRecurring, description: e.target.value })}
                   placeholder="Ex: Aluguel, Salário..."
-                  className="w-full px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+                  className="w-full px-4 py-2 rounded-2xl focus:outline-none focus:ring-2 focus:ring-amber-500/50"
                   style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
                   required
                 />
@@ -152,7 +152,7 @@ export function RecurringTransactions({
                   value={newRecurring.amount}
                   onChange={(e) => setNewRecurring({ ...newRecurring, amount: e.target.value })}
                   placeholder="0,00"
-                  className="w-full px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+                  className="w-full px-4 py-2 rounded-2xl focus:outline-none focus:ring-2 focus:ring-amber-500/50"
                   style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
                   required
                 />
@@ -165,7 +165,7 @@ export function RecurringTransactions({
                 <select
                   value={newRecurring.category}
                   onChange={(e) => setNewRecurring({ ...newRecurring, category: e.target.value })}
-                  className="w-full px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+                  className="w-full px-4 py-2 rounded-2xl focus:outline-none focus:ring-2 focus:ring-amber-500/50"
                   style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
                   required
                 >
@@ -180,7 +180,7 @@ export function RecurringTransactions({
                 <select
                   value={newRecurring.frequency}
                   onChange={(e) => setNewRecurring({ ...newRecurring, frequency: e.target.value as RecurringTransaction['frequency'] })}
-                  className="w-full px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+                  className="w-full px-4 py-2 rounded-2xl focus:outline-none focus:ring-2 focus:ring-amber-500/50"
                   style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
                 >
                   {FREQUENCIES.map((freq) => (
@@ -193,7 +193,7 @@ export function RecurringTransactions({
                 <select
                   value={newRecurring.accountId}
                   onChange={(e) => setNewRecurring({ ...newRecurring, accountId: e.target.value })}
-                  className="w-full px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+                  className="w-full px-4 py-2 rounded-2xl focus:outline-none focus:ring-2 focus:ring-amber-500/50"
                   style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
                 >
                   {accounts.map((acc) => (
@@ -210,7 +210,7 @@ export function RecurringTransactions({
                   type="date"
                   value={newRecurring.startDate}
                   onChange={(e) => setNewRecurring({ ...newRecurring, startDate: e.target.value })}
-                  className="w-full px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+                  className="w-full px-4 py-2 rounded-2xl focus:outline-none focus:ring-2 focus:ring-amber-500/50"
                   style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
                   required
                 />
@@ -221,7 +221,7 @@ export function RecurringTransactions({
                   type="date"
                   value={newRecurring.endDate}
                   onChange={(e) => setNewRecurring({ ...newRecurring, endDate: e.target.value })}
-                  className="w-full px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+                  className="w-full px-4 py-2 rounded-2xl focus:outline-none focus:ring-2 focus:ring-amber-500/50"
                   style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
                 />
               </div>
@@ -230,14 +230,14 @@ export function RecurringTransactions({
             <div className="flex gap-3">
               <button
                 type="submit"
-                className="flex-1 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-medium rounded-xl hover:from-amber-400 hover:to-orange-400 transition-all"
+                className="flex-1 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-medium rounded-2xl hover:from-amber-400 hover:to-orange-400 transition-all"
               >
                 Criar Recorrência
               </button>
               <button
                 type="button"
                 onClick={() => setIsAdding(false)}
-                className="px-4 py-2 bg-[#1a1a2e] text-[#a0a0b8] rounded-xl hover:text-white transition-all"
+                className="px-4 py-2 bg-[#1a1a2e] text-[#a0a0b8] rounded-2xl hover:text-white transition-all"
               >
                 Cancelar
               </button>
@@ -258,7 +258,7 @@ export function RecurringTransactions({
             {recurring.map((rec) => (
               <div
                 key={rec.id}
-                className={`flex items-center justify-between p-4 rounded-xl border transition-all ${
+                className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${
                   rec.isActive
                     ? 'bg-[#252542] border-[#2a2a45]'
                     : 'bg-[#1a1a2e] border-[#2a2a45] opacity-60'
@@ -266,7 +266,7 @@ export function RecurringTransactions({
               >
                 <div className="flex items-center gap-4">
                   <div
-                    className={`p-2 rounded-lg ${
+                    className={`p-2 rounded-2xl ${
                       rec.type === 'income'
                         ? 'bg-emerald-500/10 text-emerald-400'
                         : 'bg-red-500/10 text-red-400'
@@ -304,12 +304,12 @@ export function RecurringTransactions({
                       onChange={(e) => onToggleRecurring(rec.id, e.target.checked)}
                       className="sr-only peer"
                     />
-                    <div className="w-11 h-6 bg-[#1a1a2e] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                    <div className="w-11 h-6 bg-[#1a1a2e] peer-focus:outline-none rounded-2xl peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-2xl after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
                   </label>
 
                   <button
                     onClick={() => onDeleteRecurring(rec.id)}
-                    className="p-2 text-[#6b6b8a] hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
+                    className="p-2 text-[#6b6b8a] hover:text-red-400 hover:bg-red-500/10 rounded-2xl transition-all"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>

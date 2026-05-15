@@ -73,14 +73,14 @@ export function Goals({ goals, onAddGoal, onDeleteGoal, onContribute }: GoalsPro
       <div className="relative rounded-2xl p-6" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold flex items-center gap-3" style={{ color: 'var(--text-primary)' }}>
-            <div className="p-2 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-lg">
+            <div className="p-2 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-2xl">
               <Target className="w-5 h-5 text-indigo-400" />
             </div>
             Metas Financeiras
           </h2>
           <button
             onClick={() => setIsAdding(!isAdding)}
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-400 text-white rounded-xl transition-all"
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-400 text-white rounded-2xl transition-all"
           >
             <Plus className="w-4 h-4" />
             Nova Meta
@@ -88,7 +88,7 @@ export function Goals({ goals, onAddGoal, onDeleteGoal, onContribute }: GoalsPro
         </div>
 
         {isAdding && (
-          <form onSubmit={handleSubmit} className="mb-6 p-4 rounded-xl space-y-4" style={{ background: 'var(--bg-tertiary)' }}>
+          <form onSubmit={handleSubmit} className="mb-6 p-4 rounded-2xl space-y-4" style={{ background: 'var(--bg-tertiary)' }}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Nome da Meta</label>
@@ -97,7 +97,7 @@ export function Goals({ goals, onAddGoal, onDeleteGoal, onContribute }: GoalsPro
                   value={newGoal.name}
                   onChange={(e) => setNewGoal({ ...newGoal, name: e.target.value })}
                   placeholder="Ex: Viagem, Carro novo..."
-                  className="w-full px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                  className="w-full px-4 py-2 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                   style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
                   required
                 />
@@ -111,7 +111,7 @@ export function Goals({ goals, onAddGoal, onDeleteGoal, onContribute }: GoalsPro
                   value={newGoal.targetAmount}
                   onChange={(e) => setNewGoal({ ...newGoal, targetAmount: e.target.value })}
                   placeholder="0,00"
-                  className="w-full px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                  className="w-full px-4 py-2 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                   style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
                   required
                 />
@@ -124,7 +124,7 @@ export function Goals({ goals, onAddGoal, onDeleteGoal, onContribute }: GoalsPro
                   type="date"
                   value={newGoal.deadline}
                   onChange={(e) => setNewGoal({ ...newGoal, deadline: e.target.value })}
-                  className="w-full px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                  className="w-full px-4 py-2 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                   style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
                 />
               </div>
@@ -136,7 +136,7 @@ export function Goals({ goals, onAddGoal, onDeleteGoal, onContribute }: GoalsPro
                       key={color.value}
                       type="button"
                       onClick={() => setNewGoal({ ...newGoal, color: color.value })}
-                      className={`w-8 h-8 rounded-full transition-all ${
+                      className={`w-8 h-8 rounded-2xl transition-all ${
                         newGoal.color === color.value ? 'ring-2 ring-white scale-110' : 'hover:scale-105'
                       }`}
                       style={{ backgroundColor: color.value }}
@@ -149,14 +149,14 @@ export function Goals({ goals, onAddGoal, onDeleteGoal, onContribute }: GoalsPro
             <div className="flex gap-3">
               <button
                 type="submit"
-                className="flex-1 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-medium rounded-xl hover:from-indigo-400 hover:to-purple-400 transition-all"
+                className="flex-1 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-medium rounded-2xl hover:from-indigo-400 hover:to-purple-400 transition-all"
               >
                 Criar Meta
               </button>
               <button
                 type="button"
                 onClick={() => setIsAdding(false)}
-                className="px-4 py-2 bg-[#1a1a2e] text-[#a0a0b8] rounded-xl hover:text-white transition-all"
+                className="px-4 py-2 bg-[#1a1a2e] text-[#a0a0b8] rounded-2xl hover:text-white transition-all"
               >
                 Cancelar
               </button>
@@ -181,12 +181,12 @@ export function Goals({ goals, onAddGoal, onDeleteGoal, onContribute }: GoalsPro
               return (
                 <div
                   key={goal.id}
-                  className="relative p-4 bg-[#252542] rounded-xl border border-[#2a2a45] group"
+                  className="relative p-4 bg-[#252542] rounded-2xl border border-[#2a2a45] group"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">
                       <div
-                        className="w-10 h-10 rounded-xl flex items-center justify-center"
+                        className="w-10 h-10 rounded-2xl flex items-center justify-center"
                         style={{ backgroundColor: `${goal.color}20` }}
                       >
                         {isCompleted ? (
@@ -207,7 +207,7 @@ export function Goals({ goals, onAddGoal, onDeleteGoal, onContribute }: GoalsPro
                     </div>
                     <button
                       onClick={() => onDeleteGoal(goal.id)}
-                      className="p-1.5 text-[#6b6b8a] hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                      className="p-1.5 text-[#6b6b8a] hover:text-red-400 hover:bg-red-500/10 rounded-2xl transition-all opacity-0 group-hover:opacity-100"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -222,9 +222,9 @@ export function Goals({ goals, onAddGoal, onDeleteGoal, onContribute }: GoalsPro
                         {progress.toFixed(0)}%
                       </span>
                     </div>
-                    <div className="h-2 bg-[#1a1a2e] rounded-full overflow-hidden">
+                    <div className="h-2 bg-[#1a1a2e] rounded-2xl overflow-hidden">
                       <div
-                        className="h-full rounded-full transition-all duration-500"
+                        className="h-full rounded-2xl transition-all duration-500"
                         style={{ width: `${progress}%`, backgroundColor: goal.color }}
                       />
                     </div>
@@ -239,12 +239,12 @@ export function Goals({ goals, onAddGoal, onDeleteGoal, onContribute }: GoalsPro
                         value={contributionAmount}
                         onChange={(e) => setContributionAmount(e.target.value)}
                         placeholder="Valor"
-                        className="flex-1 px-3 py-2 bg-[#1a1a2e] border border-[#2a2a45] rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                        className="flex-1 px-3 py-2 bg-[#1a1a2e] border border-[#2a2a45] rounded-2xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                         autoFocus
                       />
                       <button
                         onClick={() => handleContribute(goal.id)}
-                        className="px-3 py-2 bg-emerald-500 text-white rounded-lg text-sm font-medium hover:bg-emerald-400 transition-all"
+                        className="px-3 py-2 bg-emerald-500 text-white rounded-2xl text-sm font-medium hover:bg-emerald-400 transition-all"
                       >
                         Adicionar
                       </button>
@@ -253,7 +253,7 @@ export function Goals({ goals, onAddGoal, onDeleteGoal, onContribute }: GoalsPro
                           setContributingTo(null);
                           setContributionAmount('');
                         }}
-                        className="px-3 py-2 bg-[#1a1a2e] text-[#a0a0b8] rounded-lg text-sm hover:text-white transition-all"
+                        className="px-3 py-2 bg-[#1a1a2e] text-[#a0a0b8] rounded-2xl text-sm hover:text-white transition-all"
                       >
                         Cancelar
                       </button>
@@ -262,7 +262,7 @@ export function Goals({ goals, onAddGoal, onDeleteGoal, onContribute }: GoalsPro
                     <button
                       onClick={() => setContributingTo(goal.id)}
                       disabled={isCompleted}
-                      className="w-full py-2 bg-[#1a1a2e] text-[#a0a0b8] rounded-lg text-sm font-medium hover:text-white hover:bg-[#2a2a50] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      className="w-full py-2 bg-[#1a1a2e] text-[#a0a0b8] rounded-2xl text-sm font-medium hover:text-white hover:bg-[#2a2a50] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
                       <TrendingUp className="w-4 h-4" />
                       {isCompleted ? 'Meta Alcançada!' : 'Adicionar Contribuição'}

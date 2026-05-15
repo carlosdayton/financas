@@ -174,7 +174,7 @@ export function AdvancedCharts({ transactions }: AdvancedChartsProps) {
   const CustomTooltip = ({ active, payload, label }: ChartTooltipProps) => {
     if (active && payload && payload.length) {
       return (
-        <div className="rounded-xl p-4 shadow-xl" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}>
+        <div className="rounded-2xl p-4 shadow-xl" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}>
           <p className="font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>{formatMonth(label ?? '')}</p>
           {payload.map((entry, index: number) => (
             <p key={index} className="text-sm" style={{ color: entry.color }}>
@@ -200,7 +200,7 @@ export function AdvancedCharts({ transactions }: AdvancedChartsProps) {
             <div className="relative rounded-2xl p-5" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>Variação vs Mês Anterior</span>
-                <div className={`p-2 rounded-lg ${insights.expenseChange > 0 ? 'bg-red-500/10' : 'bg-emerald-500/10'}`}>
+                <div className={`p-2 rounded-2xl ${insights.expenseChange > 0 ? 'bg-red-500/10' : 'bg-emerald-500/10'}`}>
                   {insights.expenseChange > 0 ? (
                     <ArrowUpRight className="w-4 h-4 text-red-400" />
                   ) : (
@@ -222,7 +222,7 @@ export function AdvancedCharts({ transactions }: AdvancedChartsProps) {
             <div className="relative rounded-2xl p-5" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>Média Diária</span>
-                <div className="p-2 rounded-lg bg-amber-500/10">
+                <div className="p-2 rounded-2xl bg-amber-500/10">
                   <Calendar className="w-4 h-4 text-amber-400" />
                 </div>
               </div>
@@ -238,7 +238,7 @@ export function AdvancedCharts({ transactions }: AdvancedChartsProps) {
             <div className="relative rounded-2xl p-5" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>Maior Categoria</span>
-                <div className="p-2 rounded-lg bg-rose-500/10">
+                <div className="p-2 rounded-2xl bg-rose-500/10">
                   <BarChart3 className="w-4 h-4 text-rose-400" />
                 </div>
               </div>
@@ -263,10 +263,10 @@ export function AdvancedCharts({ transactions }: AdvancedChartsProps) {
       <div className="relative group">
         <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
         <div className="relative rounded-2xl p-6 overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 rounded-full blur-3xl transform translate-x-32 -translate-y-32" />
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 rounded-2xl blur-3xl transform translate-x-32 -translate-y-32" />
           
           <div className="relative flex items-center gap-3 mb-6">
-            <div className="p-2 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-lg">
+            <div className="p-2 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-2xl">
               <TrendingUp className="w-5 h-5 text-indigo-400" />
             </div>
             <h3 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Evolução do Saldo Acumulado</h3>
@@ -316,10 +316,10 @@ export function AdvancedCharts({ transactions }: AdvancedChartsProps) {
       <div className="relative group">
         <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
         <div className="relative rounded-2xl p-6 overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-emerald-500/5 to-teal-500/5 rounded-full blur-3xl transform translate-x-32 -translate-y-32" />
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-emerald-500/5 to-teal-500/5 rounded-2xl blur-3xl transform translate-x-32 -translate-y-32" />
           
           <div className="relative flex items-center gap-3 mb-6">
-            <div className="p-2 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 rounded-lg">
+            <div className="p-2 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 rounded-2xl">
               <BarChart3 className="w-5 h-5 text-emerald-400" />
             </div>
             <h3 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Comparativo Anual - Despesas</h3>
