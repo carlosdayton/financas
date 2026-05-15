@@ -102,7 +102,7 @@ export function CashFlowProjection({ transactions, recurring, installments, paym
             width={80}
           />
           <Tooltip
-            formatter={(v: number) => [fmt(v), 'Saldo Projetado']}
+            formatter={(v: number | string) => [fmt(Number(v)), 'Saldo Projetado']}
             contentStyle={{
               background: 'var(--bg-secondary)',
               border: '1px solid var(--border-color)',
