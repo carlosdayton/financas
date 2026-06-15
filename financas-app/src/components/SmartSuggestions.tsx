@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Brain, TrendingUp, AlertTriangle, X, Lightbulb, Repeat } from 'lucide-react';
 import { usePatternDetection } from '../hooks/usePatternDetection';
 import type { Transaction } from '../types/finance';
@@ -151,12 +151,14 @@ export function CategorySuggestion({
   const { suggestCategory } = usePatternDetection([]);
   const [suggestedCategory, setSuggestedCategory] = useState<string | null>(null);
 
-  useState(() => {
+  useEffect(() => {
     if (description.length > 2) {
       const category = suggestCategory(description);
       setSuggestedCategory(category);
+    } else {
+      setSuggestedCategory(null);
     }
-  });
+  }, [description, suggestCategory]);
 
   if (!suggestedCategory) return null;
 

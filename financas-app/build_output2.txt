@@ -1,8 +1,0 @@
-
-> financas-app@1.0.0 build
-> tsc -b && vite build
-
-src/hooks/useAuth.ts(23,11): error TS18048: 'lockoutData.lockedUntil' is possibly 'undefined'.
-src/hooks/usePWA.ts(20,11): error TS2430: Interface 'ServiceWorkerMessageEvent' incorrectly extends interface 'MessageEvent<any>'.
-  Property 'data' is optional in type 'ServiceWorkerMessageEvent' but required in type 'MessageEvent<any>'.
-src/pages/InstallmentsPage.tsx(9,54): error TS2304: Cannot find name 'InstallmentPayment'.

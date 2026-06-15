@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import type { Transaction, FinancialSummary, MonthlyData } from '../types/finance';
 import { usePersistedState } from './usePersistedState';
 import { getTodayLocalISO } from '../utils/date';
+import { DEFAULT_ACCOUNT_ID } from './useAccounts';
 
 const TRANSACTIONS_KEY = 'financas_transactions';
 
@@ -119,7 +120,7 @@ export function useTransactions() {
 
   const getAccountBalance = useCallback((accountId: string) => {
     return transactions
-      .filter(t => t.accountId === accountId || (!t.accountId && accountId === '1'))
+      .filter(t => t.accountId === accountId || (!t.accountId && accountId === DEFAULT_ACCOUNT_ID))
       .reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
   }, [transactions]);
 

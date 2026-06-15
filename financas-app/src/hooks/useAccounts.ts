@@ -4,6 +4,7 @@ import { usePersistedState } from './usePersistedState';
 
 const ACCOUNTS_KEY = 'financas_accounts';
 
+export const DEFAULT_ACCOUNT_ID = '1';
 export const defaultAccounts: Account[] = [
   { id: '1', name: 'Conta Principal', type: 'checking', balance: 0, color: '#6366f1', icon: 'wallet', isDefault: true },
 ];

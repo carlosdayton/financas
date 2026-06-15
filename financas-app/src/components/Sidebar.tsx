@@ -37,7 +37,7 @@ const menuItems = [
 
 export function Sidebar({ activeTab, onTabChange, alerts = {} }: SidebarProps) {
   return (
-    <aside className="w-64 min-h-screen flex flex-col z-40" style={{ background: 'var(--bg-card)', borderRight: '1px solid var(--border-color)' }}>
+    <aside className="w-64 min-h-screen hidden md:flex flex-col z-40" style={{ background: 'var(--bg-card)', borderRight: '1px solid var(--border-color)' }}>
       <div className="px-5 py-5" style={{ borderBottom: '1px solid var(--border-color)' }}>
         <div className="flex items-center gap-3">
           <div className="p-2 bg-emerald-500 text-white rounded-2xl">

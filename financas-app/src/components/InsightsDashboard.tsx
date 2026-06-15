@@ -60,11 +60,11 @@ export function InsightsDashboard({ transactions, goals }: InsightsDashboardProp
   }
 
   function getHealthStatus(score: number): { message: string } {
-    if (score >= 90) return { message: 'Sua saÃºde financeira está excelente!' };
+    if (score >= 90) return { message: 'Sua saúde financeira está excelente!' };
     if (score >= 70) return { message: 'Boa saúde financeira. Continue assim!' };
-    if (score >= 50) return { message: 'Saúde financeira regular. Há espaÃ§o para melhorar.' };
-    if (score >= 30) return { message: 'Atenção necessÃ¡ria. Revise seus gastos.' };
-    return { message: 'SituaÃ§Ã£o crítica. Busque equilibrar suas finanças.' };
+    if (score >= 50) return { message: 'Saúde financeira regular. Há espaço para melhorar.' };
+    if (score >= 30) return { message: 'Atenção necessária. Revise seus gastos.' };
+    return { message: 'Situação crítica. Busque equilibrar suas finanças.' };
   }
 
   const insights = ((): Insight[] => {
@@ -173,7 +173,7 @@ export function InsightsDashboard({ transactions, goals }: InsightsDashboardProp
           type: 'success',
           icon: <Sparkles className="w-5 h-5" />,
           title: 'Tendência de Baixa',
-          message: 'ParabÃ©ns! Você está gastando menos que a mÃ©dia recente.',
+          message: 'Parabéns! Você está gastando menos que a média recente.',
           priority: 65,
         });
       }
@@ -201,7 +201,7 @@ export function InsightsDashboard({ transactions, goals }: InsightsDashboardProp
           type: 'primary',
           icon: <Target className="w-5 h-5" />,
           title: 'Meta na Metade',
-          message: `"${closestGoal.name}" está a ${formatCurrency(remaining)} de ser concluÃ­da.`,
+          message: `"${closestGoal.name}" está a ${formatCurrency(remaining)} de ser concluída.`,
           value: `${progress.toFixed(0)}%`,
           priority: 60,
         });
@@ -236,7 +236,7 @@ export function InsightsDashboard({ transactions, goals }: InsightsDashboardProp
           type: 'warning',
           icon: <Calendar className="w-5 h-5" />,
           title: 'Projeção de Gastos',
-          message: `No ritmo atual, vocÃª gastará ${formatCurrency(projectedExpense)}.`,
+          message: `No ritmo atual, você gastará ${formatCurrency(projectedExpense)}.`,
           priority: 55,
         });
       }

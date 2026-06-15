@@ -19,7 +19,11 @@
       "Bash(git commit -m 'fix\\(ts\\): usa ValueType do recharts no formatter de CashFlowProjection *)",
       "Bash(git commit -m 'fix: remove CashFlowProjection de AnalyticsPage *)",
       "Bash(rm financas-app/src/components/CashFlowProjection.tsx)",
-      "Bash(git commit -m 'fix: deleta CashFlowProjection.tsx *)"
+      "Bash(git commit -m 'fix: deleta CashFlowProjection.tsx *)",
+      "mcp__claude_ai_Vercel__list_teams",
+      "mcp__claude_ai_Vercel__list_projects",
+      "mcp__claude_ai_Vercel__list_deployments",
+      "mcp__claude_ai_Vercel__get_deployment_build_logs"
     ]
   },
   "statusLine": {

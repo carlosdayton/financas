@@ -7,6 +7,7 @@ import { useInstallments } from './hooks/useInstallments';
 import { useAuth } from './hooks/useAuth';
 import { PrivacyProvider } from './contexts/PrivacyContext';
 import { Sidebar, type Tab } from './components/Sidebar';
+import { MobileNav } from './components/MobileNav';
 import { ConfirmModal } from './components/ConfirmModal';
 import { ToastContainer } from './components/Toast';
 import { DataExport } from './components/DataExport';
@@ -532,7 +533,7 @@ function AppInner() {
   const { title, subtitle } = PAGE_TITLES[activeTab] ?? { title: '', subtitle: '' };
 
   return (
-    <div className="app-shell min-h-screen flex">
+    <div className="app-shell min-h-screen flex flex-col md:flex-row">
       <ToastContainer toasts={toasts} onRemove={removeToast} />
 
       <ConfirmModal
@@ -550,7 +551,7 @@ function AppInner() {
 
       <main className="flex-1 overflow-auto relative">
         <header
-          className="sticky top-0 z-30 px-8 py-4 transition-all duration-300"
+          className="sticky top-0 z-30 px-4 py-3 md:px-8 md:py-4 transition-all duration-300"
           style={{ 
             background: 'rgba(var(--bg-primary-rgb), 0.78)', 
             backdropFilter: 'blur(12px)',
@@ -559,11 +560,11 @@ function AppInner() {
           }}
         >
           <div className="flex items-center justify-between animate-fade-in-up">
-            <div>
-              <h1 className="text-3xl font-display font-semibold tracking-tight" style={{ color: 'var(--text-primary)' }}>{title}</h1>
-              <p className="text-sm font-medium mt-0.5" style={{ color: 'var(--text-muted)' }}>{subtitle}</p>
+            <div className="min-w-0">
+              <h1 className="text-xl md:text-3xl font-display font-semibold tracking-tight truncate" style={{ color: 'var(--text-primary)' }}>{title}</h1>
+              <p className="text-xs md:text-sm font-medium mt-0.5 hidden sm:block" style={{ color: 'var(--text-muted)' }}>{subtitle}</p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 md:gap-3 flex-shrink-0">
               <PrivacyToggle />
               <ThemeToggle isDark={isDark} onToggle={toggleTheme} />
               <DataExport
@@ -585,7 +586,7 @@ function AppInner() {
           </div>
         </header>
 
-        <div className="p-8 w-full max-w-[1600px] mx-auto animate-fade-in-up delay-100">
+        <div className="p-4 pb-24 md:p-8 md:pb-8 w-full max-w-[1600px] mx-auto animate-fade-in-up delay-100">
           {renderContent()}
         </div>
       </main>
@@ -598,6 +599,7 @@ function AppInner() {
         onNavigate={(tab) => { setActiveTab(tab); setCommandPaletteOpen(false); }}
         onClose={() => setCommandPaletteOpen(false)}
       />
+      <MobileNav activeTab={activeTab} onTabChange={setActiveTab} alerts={sidebarAlerts} />
       <OfflineIndicator />
       <PWAInstallPrompt />
       <UpdatePrompt />
