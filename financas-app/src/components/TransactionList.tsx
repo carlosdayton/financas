@@ -59,7 +59,7 @@ export function TransactionList({ transactions, onDelete, onEdit }: TransactionL
         return (
           <div key={date}>
             {/* Date header */}
-            <div className="px-4 py-2 flex items-center justify-between bg-[var(--bg-secondary)]">
+            <div className="px-3 sm:px-4 py-2 flex items-center justify-between gap-2 bg-[var(--bg-secondary)]">
               <span className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
                 {formatDateLabel(date)}
               </span>
@@ -85,14 +85,14 @@ export function TransactionList({ transactions, onDelete, onEdit }: TransactionL
               return (
                 <div
                   key={t.id}
-                  className="group flex items-start px-4 py-3 hover:bg-[var(--bg-secondary)] transition-colors"
+                  className="group flex items-start px-3 sm:px-4 py-3 hover:bg-[var(--bg-secondary)] transition-colors"
                 >
                   {/* Left color strip */}
                   <div className={`w-0.5 self-stretch mr-3 rounded-full flex-shrink-0 mt-0.5 ${stripColor}`} />
 
                   {/* Content */}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start justify-between gap-2 sm:gap-3">
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-[var(--text-primary)] truncate leading-snug">
                           {t.description}
@@ -105,8 +105,8 @@ export function TransactionList({ transactions, onDelete, onEdit }: TransactionL
                         </p>
                       </div>
 
-                      <div className="flex items-center gap-0.5 flex-shrink-0">
-                        <span className={`text-sm font-mono font-bold ${amountColor}`}>
+                      <div className="flex flex-col items-end gap-1 flex-shrink-0 sm:flex-row sm:items-center sm:gap-0.5">
+                        <span className={`max-w-[8.5rem] truncate text-right text-xs font-mono font-bold sm:max-w-none sm:text-sm ${amountColor}`}>
                           {t.isTransfer
                             ? formatCurrency(t.amount)
                             : `${t.type === 'income' ? '+' : '-'}${formatCurrency(t.amount)}`}
@@ -115,7 +115,7 @@ export function TransactionList({ transactions, onDelete, onEdit }: TransactionL
                         {t.notes && (
                           <button
                             onClick={() => setExpandedId(isExpanded ? null : t.id)}
-                            className="p-1 opacity-0 group-hover:opacity-100 text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+                            className="p-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
                           >
                             {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                           </button>
@@ -124,7 +124,7 @@ export function TransactionList({ transactions, onDelete, onEdit }: TransactionL
                         {!t.isTransfer && (
                           <button
                             onClick={() => onEdit(t)}
-                            className="p-1 opacity-0 group-hover:opacity-100 text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+                            className="p-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
                             title="Editar"
                           >
                             <Pencil className="w-3.5 h-3.5" />
@@ -133,7 +133,7 @@ export function TransactionList({ transactions, onDelete, onEdit }: TransactionL
 
                         <button
                           onClick={() => onDelete(t.id)}
-                          className="p-1 opacity-0 group-hover:opacity-100 text-[var(--text-muted)] hover:text-red-500 transition-colors"
+                          className="p-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 text-[var(--text-muted)] hover:text-red-500 transition-colors"
                           title="Excluir"
                         >
                           <Trash2 className="w-3.5 h-3.5" />

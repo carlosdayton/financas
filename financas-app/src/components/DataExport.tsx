@@ -183,17 +183,17 @@ export function DataExport({ transactions, accounts, backupData, onImport }: Dat
       <div className="relative">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-2 px-4 py-2 rounded-2xl transition-all"
+          className="flex h-10 w-10 sm:w-auto items-center justify-center gap-2 rounded-2xl px-0 sm:px-4 py-2 transition-all"
           style={{ background: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}
         >
           <Database className="w-4 h-4" />
-          <span>Dados</span>
+          <span className="hidden sm:inline">Dados</span>
         </button>
 
         {isOpen && (
           <>
             <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-            <div className="absolute right-0 top-full mt-2 w-64 rounded-2xl shadow-xl z-50 overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
+            <div className="fixed right-3 top-16 w-[calc(100vw-1.5rem)] max-w-72 rounded-2xl shadow-xl z-50 overflow-hidden sm:absolute sm:right-0 sm:top-full sm:mt-2 sm:w-64" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
               <div className="p-3" style={{ borderBottom: '1px solid var(--border-color)' }}>
                 <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Exportar Dados</p>
               </div>

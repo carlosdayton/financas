@@ -10,25 +10,25 @@ export function PWAInstallPrompt() {
 
   return (
     <div 
-      className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-96 z-50 rounded-2xl p-4 shadow-2xl"
+      className="fixed bottom-20 left-3 right-3 z-50 rounded-2xl p-3 shadow-2xl sm:left-4 sm:right-4 sm:p-4 md:bottom-4 md:left-auto md:right-4 md:w-96"
       style={{ 
         background: 'var(--bg-card)', 
         border: '1px solid var(--border-color)',
         animation: 'slideUp 0.3s ease-out'
       }}
     >
-      <div className="flex items-start gap-3">
+      <div className="flex items-start gap-2 sm:gap-3">
         <div 
-          className="p-3 rounded-2xl"
+          className="p-2 sm:p-3 rounded-2xl"
           style={{ background: 'var(--bg-tertiary)' }}
         >
-          <Download className="w-6 h-6 text-indigo-400" />
+          <Download className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-400" />
         </div>
         <div className="flex-1">
           <h3 className="font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>
             Instalar App
           </h3>
-          <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
+          <p className="text-xs sm:text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
             Instale o Finanças Pessoais para acesso rápido e uso offline!
           </p>
           <div className="flex gap-2">
@@ -101,24 +101,24 @@ export function UpdatePrompt() {
 
   return (
     <div 
-      className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-96 z-50 rounded-2xl p-4 shadow-2xl"
+      className="fixed bottom-20 left-3 right-3 z-50 rounded-2xl p-3 shadow-2xl sm:left-4 sm:right-4 sm:p-4 md:bottom-4 md:left-auto md:right-4 md:w-96"
       style={{ 
         background: 'var(--bg-card)', 
         border: '1px solid var(--border-color)'
       }}
     >
-      <div className="flex items-start gap-3">
+      <div className="flex items-start gap-2 sm:gap-3">
         <div 
-          className="p-3 rounded-2xl"
+          className="p-2 sm:p-3 rounded-2xl"
           style={{ background: 'var(--bg-tertiary)' }}
         >
-          <RefreshCw className="w-6 h-6 text-indigo-400" />
+          <RefreshCw className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-400" />
         </div>
         <div className="flex-1">
           <h3 className="font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>
             Nova Versão Disponível
           </h3>
-          <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
+          <p className="text-xs sm:text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
             Uma atualização do app está disponível. Recarregue para obter as melhorias!
           </p>
           <div className="flex gap-2">

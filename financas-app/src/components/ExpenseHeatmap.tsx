@@ -63,7 +63,7 @@ export function ExpenseHeatmap({ transactions }: ExpenseHeatmapProps) {
   }, [heatmapData]);
 
   const getIntensityColor = (amount: number, maxAmount: number) => {
-    if (maxAmount === 0) return '';
+    if (maxAmount === 0 || amount === 0) return 'bg-[var(--bg-secondary)] border border-[var(--border-color)]';
     const intensity = amount / maxAmount;
 
     if (intensity < 0.2) return 'bg-emerald-500/20';
@@ -111,27 +111,27 @@ export function ExpenseHeatmap({ transactions }: ExpenseHeatmapProps) {
     <div className="relative mb-8">
       <div className="absolute inset-0 bg-gradient-to-r from-rose-500/10 to-orange-500/10 rounded-2xl blur-xl" />
 
-      <div className="relative bg-[#16162a] rounded-2xl border border-[#2a2a45] p-6">
-        <div className="flex items-center justify-between mb-6">
+      <div className="relative rounded-2xl p-4 sm:p-6" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
+        <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between mb-5 sm:mb-6">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-gradient-to-br from-rose-500/20 to-orange-500/20 rounded-2xl">
               <Flame className="w-5 h-5 text-rose-400" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-white">Mapa de Calor de Gastos</h2>
-              <p className="text-sm text-[#a0a0b8] capitalize">{currentMonthName}</p>
+              <h2 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Mapa de Calor de Gastos</h2>
+              <p className="text-sm capitalize" style={{ color: 'var(--text-secondary)' }}>{currentMonthName}</p>
             </div>
           </div>
 
           {stats && (
-            <div className="flex items-center gap-4 text-sm">
+            <div className="grid w-full grid-cols-2 gap-3 text-sm sm:w-auto sm:flex sm:items-center sm:gap-4">
               <div className="text-right">
-                <p className="text-[#6b6b8a]">Total</p>
-                <p className="font-semibold text-white">{formatCurrency(stats.totalSpent)}</p>
+                <p style={{ color: 'var(--text-muted)' }}>Total</p>
+                <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>{formatCurrency(stats.totalSpent)}</p>
               </div>
               <div className="text-right">
-                <p className="text-[#6b6b8a]">Media/Dia</p>
-                <p className="font-semibold text-white">{formatCurrency(stats.avgAmount)}</p>
+                <p style={{ color: 'var(--text-muted)' }}>Media/Dia</p>
+                <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>{formatCurrency(stats.avgAmount)}</p>
               </div>
             </div>
           )}
@@ -139,16 +139,16 @@ export function ExpenseHeatmap({ transactions }: ExpenseHeatmapProps) {
 
         {heatmapData.length === 0 ? (
           <div className="text-center py-8">
-            <div className="w-16 h-16 mx-auto mb-4 bg-[#252542] rounded-2xl flex items-center justify-center">
-              <Calendar className="w-8 h-8 text-[#6b6b8a]" />
+            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}>
+              <Calendar className="w-8 h-8" style={{ color: 'var(--text-muted)' }} />
             </div>
-            <p className="text-[#a0a0b8]">Nenhum gasto registrado este mes.</p>
+            <p style={{ color: 'var(--text-secondary)' }}>Nenhum gasto registrado este mes.</p>
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-7 gap-2 mb-2">
+            <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2">
               {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'].map((day) => (
-                <div key={day} className="text-center text-xs text-[#6b6b8a] font-medium">
+                <div key={day} className="text-center text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
                   {day}
                 </div>
               ))}
@@ -156,26 +156,26 @@ export function ExpenseHeatmap({ transactions }: ExpenseHeatmapProps) {
 
             <div className="space-y-2">
               {weeks.map((week, weekIndex) => (
-                <div key={weekIndex} className="grid grid-cols-7 gap-2">
+                <div key={weekIndex} className="grid grid-cols-7 gap-1 sm:gap-2">
                   {week.map((day) => (
                     <div
                       key={day.date}
-                      className={`relative aspect-square rounded-2xl flex flex-col items-center justify-center transition-all hover:scale-110 cursor-pointer group ${
+                      className={`relative aspect-square rounded-lg sm:rounded-2xl flex flex-col items-center justify-center transition-all hover:scale-110 cursor-pointer group ${
                         getIntensityColor(day.amount, stats?.maxAmount || 1)
                       }`}
                       title={`Dia ${day.day}: ${formatCurrency(day.amount)} em ${day.count} transacoes`}
                     >
-                      <span className="text-xs font-medium text-white">{day.day}</span>
+                      <span className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>{day.day}</span>
                       {day.amount > 0 && (
-                        <span className="text-[10px] text-white/80">
+                        <span className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>
                           {day.count}
                         </span>
                       )}
 
-                      <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-3 py-2 bg-[#1a1a2e] border border-[#2a2a45] rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 whitespace-nowrap">
-                        <p className="text-xs text-white font-medium">Dia {day.day}</p>
-                        <p className="text-xs text-[#a0a0b8]">{formatCurrency(day.amount)}</p>
-                        <p className="text-xs text-[#6b6b8a]">{day.count} transacoes</p>
+                      <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-3 py-2 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 whitespace-nowrap border" style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
+                        <p className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>Dia {day.day}</p>
+                        <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{formatCurrency(day.amount)}</p>
+                        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{day.count} transacoes</p>
                       </div>
                     </div>
                   ))}
@@ -183,10 +183,10 @@ export function ExpenseHeatmap({ transactions }: ExpenseHeatmapProps) {
               ))}
             </div>
 
-            <div className="flex items-center justify-center gap-4 mt-6 pt-4 border-t border-[#2a2a45]">
-              <span className="text-xs text-[#6b6b8a]">Menos</span>
+            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4 mt-6 pt-4 border-t" style={{ borderColor: 'var(--border-color)' }}>
+              <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Menos</span>
               {[
-                { color: 'bg-[#252542]', label: 'Zero' },
+                { color: 'bg-[var(--bg-secondary)] border border-[var(--border-color)]', label: 'Zero' },
                 { color: 'bg-emerald-500/20', label: 'Baixo' },
                 { color: 'bg-emerald-500/40', label: 'Moderado' },
                 { color: 'bg-amber-500/40', label: 'Medio' },
@@ -195,11 +195,11 @@ export function ExpenseHeatmap({ transactions }: ExpenseHeatmapProps) {
               ].map((item, index) => (
                 <div
                   key={index}
-                  className={`w-6 h-6 rounded ${item.color}`}
+                  className={`h-5 w-5 rounded sm:h-6 sm:w-6 ${item.color}`}
                   title={item.label}
                 />
               ))}
-              <span className="text-xs text-[#6b6b8a]">Mais</span>
+              <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Mais</span>
             </div>
           </>
         )}

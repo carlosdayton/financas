@@ -65,14 +65,14 @@ export function TransactionForm({ categories, onSubmit }: TransactionFormProps) 
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="p-4">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
+      <form onSubmit={handleSubmit} className="p-3 sm:p-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5">
           <input
             type="text"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Descrição"
-            className="col-span-2 md:col-span-1 px-3 py-2 text-sm rounded-md bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-secondary)]"
+            className="sm:col-span-2 md:col-span-1 px-3 py-2 text-sm rounded-md bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-secondary)]"
             required
           />
           <div className="relative">
@@ -91,7 +91,7 @@ export function TransactionForm({ categories, onSubmit }: TransactionFormProps) 
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="px-3 py-2 text-sm rounded-md bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-secondary)] cursor-pointer"
+            className="w-full px-3 py-2 text-sm rounded-md bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-secondary)] cursor-pointer"
             required
           >
             <option value="">Categoria</option>
@@ -103,7 +103,7 @@ export function TransactionForm({ categories, onSubmit }: TransactionFormProps) 
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="px-3 py-2 text-sm rounded-md bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-secondary)]"
+            className="w-full px-3 py-2 text-sm rounded-md bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-secondary)]"
             required
           />
         </div>

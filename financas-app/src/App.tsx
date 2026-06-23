@@ -549,9 +549,9 @@ function AppInner() {
 
       <Sidebar activeTab={activeTab} onTabChange={setActiveTab} alerts={sidebarAlerts} />
 
-      <main className="flex-1 overflow-auto relative">
+      <main className="flex-1 min-w-0 overflow-auto relative">
         <header
-          className="sticky top-0 z-30 px-4 py-3 md:px-8 md:py-4 transition-all duration-300"
+          className="sticky top-0 z-30 px-3 py-3 md:px-8 md:py-4 transition-all duration-300"
           style={{ 
             background: 'rgba(var(--bg-primary-rgb), 0.78)', 
             backdropFilter: 'blur(12px)',
@@ -559,12 +559,12 @@ function AppInner() {
             borderBottom: '1px solid var(--border-color)' 
           }}
         >
-          <div className="flex items-center justify-between animate-fade-in-up">
+          <div className="flex items-center justify-between gap-2 animate-fade-in-up">
             <div className="min-w-0">
               <h1 className="text-xl md:text-3xl font-display font-semibold tracking-tight truncate" style={{ color: 'var(--text-primary)' }}>{title}</h1>
               <p className="text-xs md:text-sm font-medium mt-0.5 hidden sm:block" style={{ color: 'var(--text-muted)' }}>{subtitle}</p>
             </div>
-            <div className="flex items-center gap-1.5 md:gap-3 flex-shrink-0">
+            <div className="flex items-center gap-1 md:gap-3 flex-shrink-0">
               <PrivacyToggle />
               <ThemeToggle isDark={isDark} onToggle={toggleTheme} />
               <DataExport
@@ -576,7 +576,7 @@ function AppInner() {
               {hasPin && (
                 <button
                   onClick={logout}
-                  className="px-4 py-2 rounded-2xl text-sm font-semibold transition-all duration-300 hover:bg-red-500/10 hover:text-red-400 hover:shadow-lg hover:shadow-red-500/10"
+                  className="hidden sm:inline-flex px-4 py-2 rounded-2xl text-sm font-semibold transition-all duration-300 hover:bg-red-500/10 hover:text-red-400 hover:shadow-lg hover:shadow-red-500/10"
                   style={{ color: 'var(--text-secondary)' }}
                 >
                   Bloquear
@@ -586,7 +586,7 @@ function AppInner() {
           </div>
         </header>
 
-        <div className="p-4 pb-24 md:p-8 md:pb-8 w-full max-w-[1600px] mx-auto animate-fade-in-up delay-100">
+        <div className="p-3 pb-24 md:p-8 md:pb-8 w-full max-w-[1600px] mx-auto animate-fade-in-up delay-100">
           {renderContent()}
         </div>
       </main>

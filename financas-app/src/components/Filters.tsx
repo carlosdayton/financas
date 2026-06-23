@@ -52,9 +52,9 @@ export function Filters({ transactions, categories, onFilterChange }: FiltersPro
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center">
       {/* Search */}
-      <div className="relative flex-1 min-w-40">
+      <div className="relative col-span-2 sm:col-span-1 sm:flex-1 sm:min-w-40">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
         <input
           type="text"
@@ -66,12 +66,12 @@ export function Filters({ transactions, categories, onFilterChange }: FiltersPro
       </div>
 
       {/* Type pills */}
-      <div className="flex gap-0.5 p-1 rounded-md bg-[var(--bg-tertiary)] border border-[var(--border-color)]">
+      <div className="col-span-2 flex gap-0.5 p-1 rounded-md bg-[var(--bg-tertiary)] border border-[var(--border-color)] sm:col-span-1">
         {(['all', 'income', 'expense'] as const).map(t => (
           <button
             key={t}
             onClick={() => setSelectedType(t)}
-            className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
+            className={`flex-1 px-2 sm:px-3 py-1 text-xs font-medium rounded transition-colors ${
               selectedType === t
                 ? t === 'income'
                   ? 'bg-emerald-500 text-white'
@@ -90,7 +90,7 @@ export function Filters({ transactions, categories, onFilterChange }: FiltersPro
       <select
         value={selectedCategory}
         onChange={(e) => setSelectedCategory(e.target.value)}
-        className="px-3 py-2 text-sm rounded-md bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)] focus:outline-none cursor-pointer"
+        className="w-full min-w-0 px-3 py-2 text-sm rounded-md bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)] focus:outline-none cursor-pointer sm:w-auto"
       >
         <option value="all">Categoria</option>
         {categories.map((cat) => (
@@ -102,7 +102,7 @@ export function Filters({ transactions, categories, onFilterChange }: FiltersPro
       <select
         value={selectedMonth}
         onChange={(e) => setSelectedMonth(e.target.value)}
-        className="px-3 py-2 text-sm rounded-md bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)] focus:outline-none cursor-pointer"
+        className="w-full min-w-0 px-3 py-2 text-sm rounded-md bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)] focus:outline-none cursor-pointer sm:w-auto"
       >
         <option value="all">Todo período</option>
         {availableMonths.map((month) => (

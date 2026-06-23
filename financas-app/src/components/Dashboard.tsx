@@ -79,34 +79,40 @@ export function Dashboard({
 
   return (
     <div className="space-y-6 mb-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-0 border border-[var(--border-color)]">
-        {cards.map((card, index) => (
-          <div key={card.title} className={`p-6 bg-[var(--bg-card)] premium-hover ${index !== cards.length - 1 ? 'border-b sm:border-b-0 sm:border-r border-[var(--border-color)]' : ''}`}>
-            <div className="flex items-start justify-between gap-4">
+      <div className="relative">
+        <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 to-teal-500/5 rounded-2xl blur-xl pointer-events-none" />
+        <div className="relative grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+          {cards.map((card) => (
+            <div key={card.title} className="glass p-4 sm:p-6 premium-hover card-hover flex flex-col justify-between">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>{card.title}</p>
-                <p className="text-xs mt-1 capitalize font-mono" style={{ color: 'var(--text-muted)' }}>{card.subtitle}</p>
-              </div>
-              <div className="p-2 border border-[var(--border-color)] bg-[var(--bg-tertiary)]" style={{ color: card.color }}>
-                <card.icon className="w-5 h-5" />
-              </div>
-            </div>
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-semibold uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>{card.title}</p>
+                    <p className="text-xs mt-1 capitalize font-mono" style={{ color: 'var(--text-muted)' }}>{card.subtitle}</p>
+                  </div>
+                  <div className="p-2 border border-[var(--border-color)] bg-[var(--bg-tertiary)] rounded-xl" style={{ color: card.color }}>
+                    <card.icon className="w-5 h-5" />
+                  </div>
+                </div>
 
-            <p className="mt-8 text-4xl font-display font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
-              {card.isCount ? card.value.toLocaleString('pt-BR') : formatCurrency(card.value)}
-            </p>
-            <div className="mt-4 h-1 rounded-2xl bg-[var(--bg-tertiary)] overflow-hidden">
-              <div className="h-full w-2/5 rounded-2xl" style={{ background: card.color }} />
+                <p className="mt-5 sm:mt-8 text-[clamp(1.45rem,8vw,2.25rem)] md:text-4xl font-display font-bold tracking-tight break-words" style={{ color: 'var(--text-primary)' }}>
+                  {card.isCount ? card.value.toLocaleString('pt-BR') : formatCurrency(card.value)}
+                </p>
+              </div>
+
+              <div className="mt-4 h-1 rounded-2xl bg-[var(--bg-tertiary)] overflow-hidden">
+                <div className="h-full w-2/5 rounded-2xl" style={{ background: card.color }} />
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {accounts.length > 0 && (
-          <div className="p-6 border border-[var(--border-color)] bg-[var(--bg-card)]">
-            <div className="flex items-center justify-between mb-6 pb-4 border-b border-[var(--border-color)]">
-              <h3 className="text-xl font-display font-bold flex items-center gap-3" style={{ color: 'var(--text-primary)' }}>
+          <div className="p-4 sm:p-6 border border-[var(--border-color)] bg-[var(--bg-card)]">
+            <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 pb-4 border-b border-[var(--border-color)]">
+              <h3 className="text-lg sm:text-xl font-display font-bold flex items-center gap-3" style={{ color: 'var(--text-primary)' }}>
                 <div className="p-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)]">
                   <Wallet className="w-5 h-5" style={{ color: 'var(--accent-primary)' }} />
                 </div>
@@ -126,11 +132,11 @@ export function Dashboard({
                 const isCredit = account.type === 'credit';
 
                 return (
-                  <div key={account.id} className="ledger-row premium-hover flex items-center justify-between py-4 px-2">
-                    <div className="flex items-center gap-4">
+                  <div key={account.id} className="ledger-row premium-hover flex items-center justify-between gap-3 py-4 px-1 sm:px-2">
+                    <div className="flex min-w-0 items-center gap-3 sm:gap-4">
                       <div className="w-3 h-3 border border-[var(--border-color)]" style={{ backgroundColor: account.color }} />
                       <div>
-                        <span className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>{account.name}</span>
+                        <span className="text-sm sm:text-base font-semibold truncate" style={{ color: 'var(--text-primary)' }}>{account.name}</span>
                         {isCredit && account.creditLimit && (
                           <p className="text-xs mt-1 font-mono" style={{ color: 'var(--text-muted)' }}>
                             Limite: {formatCurrency(account.creditLimit)}
@@ -139,7 +145,7 @@ export function Dashboard({
                       </div>
                     </div>
                     <div className="text-right">
-                      <span className="text-base font-mono font-bold" style={{ color: balance >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)' }}>
+                      <span className="text-sm sm:text-base font-mono font-bold whitespace-nowrap" style={{ color: balance >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)' }}>
                         {formatCurrency(balance)}
                       </span>
                       {isCredit && account.creditLimit && (
@@ -166,9 +172,9 @@ export function Dashboard({
         )}
 
         {criticalBudgets.length > 0 && (
-          <div className="p-6 border border-[var(--border-color)] bg-[var(--bg-card)]">
-            <div className="flex items-center justify-between mb-6 pb-4 border-b border-[var(--border-color)]">
-              <h3 className="text-xl font-display font-bold flex items-center gap-3" style={{ color: 'var(--text-primary)' }}>
+          <div className="p-4 sm:p-6 border border-[var(--border-color)] bg-[var(--bg-card)]">
+            <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 pb-4 border-b border-[var(--border-color)]">
+              <h3 className="text-lg sm:text-xl font-display font-bold flex items-center gap-3" style={{ color: 'var(--text-primary)' }}>
                 <div className="p-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)]">
                   <TrendingDown className="w-5 h-5" style={{ color: 'var(--accent-danger)' }} />
                 </div>
@@ -192,7 +198,7 @@ export function Dashboard({
                       <span className="text-base font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
                         {item.budget.category}
                       </span>
-                      <span className="text-sm font-mono font-bold whitespace-nowrap" style={{ color: barColor }}>
+                      <span className="text-xs sm:text-sm font-mono font-bold whitespace-nowrap" style={{ color: barColor }}>
                         {formatCurrency(item.spent)} / {formatCurrency(item.budget.amount)}
                       </span>
                     </div>
