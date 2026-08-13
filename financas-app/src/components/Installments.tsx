@@ -1,14 +1,14 @@
 import { useState } from 'react';
-import { 
-  CreditCard, 
-  Plus, 
-  Trash2, 
-  CheckCircle2, 
-  Circle, 
+import {
+  CreditCard,
+  Plus,
+  Trash2,
+  CheckCircle2,
+  Circle,
   Calendar,
   DollarSign,
   Package,
-  AlertCircle
+  AlertCircle,
 } from 'lucide-react';
 import type { Installment, InstallmentPayment } from '../types/finance';
 import { getTodayLocalISO } from '../utils/date';
@@ -28,15 +28,15 @@ const CATEGORIES = [
   'Educação',
   'Saúde',
   'Veículo',
-  'Outros'
+  'Outros',
 ];
 
-export function Installments({ 
-  installments, 
-  onAddInstallment, 
-  onPayInstallment, 
+export function Installments({
+  installments,
+  onAddInstallment,
+  onPayInstallment,
   onDeleteInstallment,
-  getInstallmentPayments 
+  getInstallmentPayments,
 }: InstallmentsProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [newInstallment, setNewInstallment] = useState({
@@ -77,271 +77,312 @@ export function Installments({
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
   };
 
-  const activeInstallments = installments.filter(inst => inst.isActive);
-  const completedInstallments = installments.filter(inst => !inst.isActive);
+  const activeInstallments = installments.filter((inst) => inst.isActive);
+  const completedInstallments = installments.filter((inst) => !inst.isActive);
 
   const getProgressPercentage = (inst: Installment) => {
     return (inst.paidInstallments / inst.totalInstallments) * 100;
   };
 
   const getRemainingAmount = (inst: Installment) => {
-    return inst.totalAmount - (inst.installmentAmount * inst.paidInstallments);
+    return inst.totalAmount - inst.installmentAmount * inst.paidInstallments;
   };
 
   return (
-    <div className="space-y-6">
-      {/* Add Button */}
-      <div className="flex justify-end">
+    <div className="space-y-5 animate-fade-in-up">
+      {/* Header Banner */}
+      <div className="glass p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className="p-3 rounded-2xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+            <Package className="w-6 h-6" />
+          </div>
+          <div>
+            <h2 className="text-lg font-display font-bold" style={{ color: 'var(--text-primary)' }}>
+              Compras Parceladas
+            </h2>
+            <p className="text-xs text-[var(--text-muted)]">
+              Gerencie parcelamentos de longo prazo e compromissos mensais
+            </p>
+          </div>
+        </div>
+
         <button
           onClick={() => setIsAdding(!isAdding)}
-          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-2xl font-medium hover:opacity-90 transition-opacity"
+          className="flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-500 hover:bg-indigo-600 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-indigo-500/20"
         >
-          <Plus className="w-5 h-5" />
+          <Plus className="w-4 h-4 stroke-[3]" />
           Novo Parcelamento
         </button>
       </div>
 
-      {/* Summary Cards */}
+      {/* Summary KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="relative rounded-2xl p-5" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
+        <div className="glass p-4 rounded-2xl border border-[var(--border-color)]">
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 rounded-2xl bg-indigo-500/20">
-              <CreditCard className="w-5 h-5 text-indigo-400" />
+            <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-400">
+              <CreditCard className="w-4.5 h-4.5" />
             </div>
-            <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>Ativos</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+              Parcelamentos Ativos
+            </span>
           </div>
-          <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{activeInstallments.length}</p>
+          <p className="text-2xl font-mono font-bold" style={{ color: 'var(--text-primary)' }}>
+            {activeInstallments.length}
+          </p>
         </div>
 
-        <div className="relative rounded-2xl p-5" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
+        <div className="glass p-4 rounded-2xl border border-[var(--border-color)]">
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 rounded-2xl bg-emerald-500/20">
-              <DollarSign className="w-5 h-5 text-emerald-400" />
+            <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400">
+              <DollarSign className="w-4.5 h-4.5" />
             </div>
-            <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>Valor Restante</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+              Saldo Restante a Pagar
+            </span>
           </div>
-          <p className="text-2xl font-bold text-emerald-400">
+          <p className="text-2xl font-mono font-bold text-emerald-400">
             {formatCurrency(activeInstallments.reduce((sum, inst) => sum + getRemainingAmount(inst), 0))}
           </p>
         </div>
 
-        <div className="relative rounded-2xl p-5" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
+        <div className="glass p-4 rounded-2xl border border-[var(--border-color)]">
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 rounded-2xl bg-amber-500/20">
-              <Calendar className="w-5 h-5 text-amber-400" />
+            <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400">
+              <Calendar className="w-4.5 h-4.5" />
             </div>
-            <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>Concluídos</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+              Total Concluídos
+            </span>
           </div>
-          <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{completedInstallments.length}</p>
+          <p className="text-2xl font-mono font-bold" style={{ color: 'var(--text-primary)' }}>
+            {completedInstallments.length}
+          </p>
         </div>
       </div>
 
-      {/* Add Form */}
+      {/* Form */}
       {isAdding && (
-        <form onSubmit={handleSubmit} className="rounded-2xl p-6 space-y-4" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-          <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Novo Parcelamento</h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Descrição</label>
+        <form onSubmit={handleSubmit} className="glass p-5 rounded-2xl space-y-4 animate-fade-in">
+          <h3 className="text-sm font-display font-bold text-[var(--text-primary)]">
+            Cadastrar Compra Parcelada
+          </h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="md:col-span-2">
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1">
+                Descrição do Item/Serviço
+              </label>
               <input
                 type="text"
                 value={newInstallment.description}
                 onChange={(e) => setNewInstallment({ ...newInstallment, description: e.target.value })}
-                placeholder="Ex: iPhone 15 Pro"
-                className="w-full px-4 py-2 rounded-2xl border outline-none focus:ring-2 focus:ring-indigo-500/50"
-                style={{ background: 'var(--bg-tertiary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+                placeholder="Ex: iPhone 15 Pro, Notebook, Sofá..."
+                className="w-full px-3.5 py-2.5 text-sm rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] focus:outline-none focus:border-indigo-500/50"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Categoria</label>
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1">
+                Categoria
+              </label>
               <select
                 value={newInstallment.category}
                 onChange={(e) => setNewInstallment({ ...newInstallment, category: e.target.value })}
-                className="w-full px-4 py-2 rounded-2xl border outline-none focus:ring-2 focus:ring-indigo-500/50"
-                style={{ background: 'var(--bg-tertiary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+                className="w-full px-3.5 py-2.5 text-sm rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] focus:outline-none cursor-pointer"
               >
-                {CATEGORIES.map(cat => (
-                  <option key={cat} value={cat}>{cat}</option>
+                {CATEGORIES.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
                 ))}
               </select>
             </div>
+          </div>
 
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
             <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Valor Total</label>
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1">
+                Valor Total (R$)
+              </label>
               <input
                 type="number"
                 step="0.01"
                 value={newInstallment.totalAmount}
                 onChange={(e) => setNewInstallment({ ...newInstallment, totalAmount: e.target.value })}
-                placeholder="R$ 0,00"
-                className="w-full px-4 py-2 rounded-2xl border outline-none focus:ring-2 focus:ring-indigo-500/50"
-                style={{ background: 'var(--bg-tertiary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+                placeholder="0,00"
+                className="w-full px-3.5 py-2.5 text-sm font-mono font-bold rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] focus:outline-none"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Valor da Parcela</label>
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1">
+                Valor por Parcela (R$)
+              </label>
               <input
                 type="number"
                 step="0.01"
                 value={newInstallment.installmentAmount}
                 onChange={(e) => setNewInstallment({ ...newInstallment, installmentAmount: e.target.value })}
-                placeholder="R$ 0,00"
-                className="w-full px-4 py-2 rounded-2xl border outline-none focus:ring-2 focus:ring-indigo-500/50"
-                style={{ background: 'var(--bg-tertiary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+                placeholder="0,00"
+                className="w-full px-3.5 py-2.5 text-sm font-mono font-bold rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] focus:outline-none"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Total de Parcelas</label>
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1">
+                Qtd. de Parcelas
+              </label>
               <input
                 type="number"
                 value={newInstallment.totalInstallments}
                 onChange={(e) => setNewInstallment({ ...newInstallment, totalInstallments: e.target.value })}
                 placeholder="12"
-                className="w-full px-4 py-2 rounded-2xl border outline-none focus:ring-2 focus:ring-indigo-500/50"
-                style={{ background: 'var(--bg-tertiary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+                className="w-full px-3.5 py-2.5 text-sm font-mono font-bold rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] focus:outline-none"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Primeira Parcela</label>
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1">
+                Data 1ª Parcela
+              </label>
               <input
                 type="date"
                 value={newInstallment.startDate}
                 onChange={(e) => setNewInstallment({ ...newInstallment, startDate: e.target.value })}
-                className="w-full px-4 py-2 rounded-2xl border outline-none focus:ring-2 focus:ring-indigo-500/50"
-                style={{ background: 'var(--bg-tertiary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+                className="w-full px-3.5 py-2.5 text-sm rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] focus:outline-none cursor-pointer"
                 required
               />
             </div>
           </div>
 
-          <div className="flex gap-2 pt-2">
-            <button
-              type="submit"
-              className="px-6 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-2xl font-medium hover:opacity-90 transition-opacity"
-            >
-              Criar Parcelamento
-            </button>
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-[var(--border-color)]">
             <button
               type="button"
               onClick={() => setIsAdding(false)}
-              className="px-6 py-2 rounded-2xl font-medium transition-colors"
-              style={{ background: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}
+              className="px-4 py-2 rounded-xl text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)]"
             >
               Cancelar
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-indigo-500 hover:bg-indigo-600 shadow-md shadow-indigo-500/20"
+            >
+              Salvar Parcelamento
             </button>
           </div>
         </form>
       )}
 
-      {/* Active Installments */}
+      {/* Active List */}
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Parcelamentos Ativos</h3>
-        
         {activeInstallments.length === 0 ? (
-          <div className="text-center py-8 rounded-2xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center" style={{ background: 'var(--bg-tertiary)' }}>
-              <Package className="w-8 h-8" style={{ color: 'var(--text-muted)' }} />
-            </div>
-            <p style={{ color: 'var(--text-secondary)' }}>Nenhum parcelamento ativo.</p>
-            <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>Adicione uma compra parcelada para começar!</p>
+          <div className="glass p-8 text-center rounded-2xl">
+            <Package className="w-10 h-10 mx-auto mb-3 text-[var(--text-muted)]" />
+            <h4 className="text-base font-display font-semibold" style={{ color: 'var(--text-primary)' }}>
+              Nenhum parcelamento ativo
+            </h4>
+            <p className="text-xs text-[var(--text-muted)] mt-1">
+              Adicione suas compras parceladas para acompanhar o cronograma de pagamentos.
+            </p>
           </div>
         ) : (
           activeInstallments.map((inst) => (
-            <div
-              key={inst.id}
-              className="rounded-2xl p-5 transition-all hover:scale-[1.01]"
-              style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}
-            >
-              <div className="flex items-start justify-between mb-4">
+            <div key={inst.id} className="glass p-5 rounded-2xl border border-[var(--border-color)] space-y-4">
+              <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="p-3 rounded-2xl bg-indigo-500/20">
-                    <CreditCard className="w-6 h-6 text-indigo-400" />
+                  <div className="p-3 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                    <CreditCard className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="font-semibold" style={{ color: 'var(--text-primary)' }}>{inst.description}</h4>
-                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{inst.category}</p>
+                    <h4 className="font-display font-bold text-base" style={{ color: 'var(--text-primary)' }}>
+                      {inst.description}
+                    </h4>
+                    <span className="text-xs text-[var(--text-muted)]">{inst.category}</span>
                   </div>
                 </div>
+
                 <button
                   onClick={() => onDeleteInstallment(inst.id)}
-                  className="p-2 rounded-2xl transition-colors hover:bg-red-500/20"
-                  style={{ color: 'var(--text-muted)' }}
+                  className="p-2 rounded-xl text-[var(--text-muted)] hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+                  title="Excluir parcelamento"
                 >
-                  <Trash2 className="w-5 h-5" />
+                  <Trash2 className="w-4 h-4" />
                 </button>
               </div>
 
-              {/* Progress */}
-              <div className="mb-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                    Progresso: {inst.paidInstallments} de {inst.totalInstallments} parcelas
+              {/* Progress Bar */}
+              <div>
+                <div className="flex items-center justify-between text-xs font-semibold mb-1.5">
+                  <span className="text-[var(--text-secondary)]">
+                    Progresso: {inst.paidInstallments} de {inst.totalInstallments} parcelas seguras
                   </span>
-                  <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                  <span className="text-indigo-400 font-mono">
                     {getProgressPercentage(inst).toFixed(0)}%
                   </span>
                 </div>
-                <div className="h-2 rounded-2xl overflow-hidden" style={{ background: 'var(--bg-tertiary)' }}>
+                <div className="h-2 rounded-full bg-[var(--bg-tertiary)] overflow-hidden">
                   <div
-                    className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all"
+                    className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-500"
                     style={{ width: `${getProgressPercentage(inst)}%` }}
                   />
                 </div>
               </div>
 
               {/* Values */}
-              <div className="grid grid-cols-3 gap-4 mb-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3.5 rounded-xl bg-[var(--bg-tertiary)]/40 border border-[var(--border-color)]">
                 <div>
-                  <p className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>Valor Total</p>
-                  <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>{formatCurrency(inst.totalAmount)}</p>
+                  <span className="text-[10px] uppercase font-semibold text-[var(--text-muted)] block">Valor Total</span>
+                  <span className="text-sm font-mono font-bold" style={{ color: 'var(--text-primary)' }}>
+                    {formatCurrency(inst.totalAmount)}
+                  </span>
                 </div>
                 <div>
-                  <p className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>Parcela</p>
-                  <p className="font-semibold text-indigo-400">{formatCurrency(inst.installmentAmount)}</p>
+                  <span className="text-[10px] uppercase font-semibold text-[var(--text-muted)] block">Valor Parcela</span>
+                  <span className="text-sm font-mono font-bold text-indigo-400">
+                    {formatCurrency(inst.installmentAmount)}
+                  </span>
                 </div>
                 <div>
-                  <p className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>Restante</p>
-                  <p className="font-semibold text-emerald-400">{formatCurrency(getRemainingAmount(inst))}</p>
+                  <span className="text-[10px] uppercase font-semibold text-[var(--text-muted)] block">Restante</span>
+                  <span className="text-sm font-mono font-bold text-emerald-400">
+                    {formatCurrency(getRemainingAmount(inst))}
+                  </span>
                 </div>
               </div>
 
               {/* Payments Grid */}
-              <div className="pt-4 border-t" style={{ borderColor: 'var(--border-color)' }}>
-                <p className="text-sm font-medium mb-3" style={{ color: 'var(--text-secondary)' }}>Parcelas:</p>
-                <div className="grid grid-cols-6 sm:grid-cols-10 md:grid-cols-12 gap-2">
+              <div className="pt-2">
+                <span className="text-xs font-semibold text-[var(--text-muted)] block mb-2">Parcelas do Cronograma:</span>
+                <div className="grid grid-cols-6 sm:grid-cols-10 md:grid-cols-12 gap-1.5">
                   {getInstallmentPayments(inst.id).map((payment) => {
                     const isOverdue = !payment.isPaid && new Date(payment.dueDate) < new Date();
+
                     return (
                       <button
                         key={payment.id}
                         onClick={() => !payment.isPaid && onPayInstallment(inst.id, payment.installmentNumber)}
                         disabled={payment.isPaid}
-                        className={`p-2 rounded-2xl text-xs font-medium transition-all ${
+                        className={`p-2 rounded-xl text-xs font-semibold transition-all flex flex-col items-center justify-center gap-0.5 ${
                           payment.isPaid
-                            ? 'bg-emerald-500/20 text-emerald-400 cursor-default'
+                            ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 cursor-default'
                             : isOverdue
-                            ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
-                            : 'bg-amber-500/20 text-amber-400 hover:bg-amber-500/30'
+                            ? 'bg-rose-500/15 text-rose-400 border border-rose-500/20 hover:bg-rose-500/25'
+                            : 'bg-amber-500/15 text-amber-400 border border-amber-500/20 hover:bg-amber-500/25'
                         }`}
                         title={`Vencimento: ${new Date(payment.dueDate).toLocaleDateString('pt-BR')}`}
                       >
                         {payment.isPaid ? (
-                          <CheckCircle2 className="w-4 h-4 mx-auto" />
+                          <CheckCircle2 className="w-3.5 h-3.5" />
                         ) : isOverdue ? (
-                          <AlertCircle className="w-4 h-4 mx-auto" />
+                          <AlertCircle className="w-3.5 h-3.5" />
                         ) : (
-                          <Circle className="w-4 h-4 mx-auto" />
+                          <Circle className="w-3.5 h-3.5" />
                         )}
-                        <span className="block mt-1">{payment.installmentNumber}</span>
+                        <span className="text-[10px] font-mono">{payment.installmentNumber}</span>
                       </button>
                     );
                   })}
@@ -354,34 +395,36 @@ export function Installments({
 
       {/* Completed Installments */}
       {completedInstallments.length > 0 && (
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Concluídos</h3>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-3 pt-4">
+          <h3 className="text-sm font-display font-bold text-[var(--text-muted)] uppercase tracking-wider">
+            Parcelamentos Finalizados
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {completedInstallments.map((inst) => (
               <div
                 key={inst.id}
-                className="rounded-2xl p-4 opacity-70"
-                style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}
+                className="glass p-4 rounded-xl flex items-center justify-between border border-[var(--border-color)] opacity-75"
               >
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-2xl bg-emerald-500/20">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                  <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400">
+                    <CheckCircle2 className="w-4 h-4" />
                   </div>
-                  <div className="flex-1">
-                    <h4 className="font-medium" style={{ color: 'var(--text-primary)' }}>{inst.description}</h4>
-                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                      {formatCurrency(inst.totalAmount)} • {inst.totalInstallments}x
+                  <div>
+                    <h4 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                      {inst.description}
+                    </h4>
+                    <p className="text-xs font-mono text-[var(--text-muted)]">
+                      {formatCurrency(inst.totalAmount)} • {inst.totalInstallments}x de {formatCurrency(inst.installmentAmount)}
                     </p>
                   </div>
-                  <button
-                    onClick={() => onDeleteInstallment(inst.id)}
-                    className="p-2 rounded-2xl transition-colors hover:bg-red-500/20"
-                    style={{ color: 'var(--text-muted)' }}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
                 </div>
+
+                <button
+                  onClick={() => onDeleteInstallment(inst.id)}
+                  className="p-1.5 text-[var(--text-muted)] hover:text-rose-400 transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
               </div>
             ))}
           </div>

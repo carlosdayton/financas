@@ -160,7 +160,7 @@ export function CashFlowProjection({ transactions, months = 4 }: CashFlowProject
         </div>
 
         <div className="h-72">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minWidth={0}>
             <AreaChart data={data}>
               <defs>
                 <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">

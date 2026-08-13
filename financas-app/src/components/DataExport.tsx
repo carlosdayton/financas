@@ -161,17 +161,17 @@ export function DataExport({ transactions, accounts, backupData, onImport }: Dat
                 Abre direto no Excel (BOM UTF-8).
               </p>
             </div>
-            <div className="flex gap-3 pt-1">
+            <div className="grid grid-cols-1 gap-3 pt-1 sm:flex sm:items-center">
               <button
                 onClick={() => setCsvModal(false)}
-                className="flex-1 py-2.5 rounded-2xl text-sm transition-colors"
+                className="w-full sm:flex-1 py-2.5 rounded-2xl text-sm transition-colors"
                 style={{ background: 'var(--bg-tertiary)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}
               >
                 Cancelar
               </button>
               <button
                 onClick={exportToCSV}
-                className="flex-1 py-2.5 rounded-2xl text-sm font-bold text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 transition-all"
+                className="w-full sm:flex-1 py-2.5 rounded-2xl text-sm font-bold text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 transition-all"
               >
                 Baixar CSV
               </button>

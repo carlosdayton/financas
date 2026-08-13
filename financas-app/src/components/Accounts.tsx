@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Wallet, Plus, Trash2, CreditCard, PiggyBank, Banknote, TrendingUp, Landmark, ArrowRightLeft } from 'lucide-react';
+import { Wallet, Plus, Trash2, CreditCard, PiggyBank, Banknote, TrendingUp, Landmark, ArrowRightLeft, Check } from 'lucide-react';
 import type { Account } from '../types/finance';
 import { getTodayLocalISO } from '../utils/date';
 
@@ -28,16 +28,25 @@ const ACCOUNT_TYPES = [
 ];
 
 const ACCOUNT_COLORS = [
-  { name: 'Indigo', value: '#6366f1' },
   { name: 'Emerald', value: '#10b981' },
+  { name: 'Sky', value: '#0ea5e9' },
+  { name: 'Indigo', value: '#6366f1' },
   { name: 'Amber', value: '#f59e0b' },
   { name: 'Rose', value: '#f43f5e' },
-  { name: 'Cyan', value: '#06b6d4' },
   { name: 'Violet', value: '#8b5cf6' },
 ];
 
-export function Accounts({ accounts, accountBalances, onAddAccount, onDeleteAccount, selectedAccount, onSelectAccount, onTransferBetweenAccounts }: AccountsProps) {
+export function Accounts({
+  accounts,
+  accountBalances,
+  onAddAccount,
+  onDeleteAccount,
+  selectedAccount,
+  onSelectAccount,
+  onTransferBetweenAccounts,
+}: AccountsProps) {
   const [isAdding, setIsAdding] = useState(false);
+  const [isTransferOpen, setIsTransferOpen] = useState(false);
   const [transfer, setTransfer] = useState({
     fromAccountId: accounts[0]?.id ?? '',
     toAccountId: accounts[1]?.id ?? '',
@@ -76,7 +85,7 @@ export function Accounts({ accounts, accountBalances, onAddAccount, onDeleteAcco
   };
 
   const getAccountIcon = (type: string) => {
-    const accountType = ACCOUNT_TYPES.find(t => t.type === type);
+    const accountType = ACCOUNT_TYPES.find((t) => t.type === type);
     return accountType?.icon || Wallet;
   };
 
@@ -86,7 +95,12 @@ export function Accounts({ accounts, accountBalances, onAddAccount, onDeleteAcco
     e.preventDefault();
     const amount = parseFloat(transfer.amount);
 
-    if (!transfer.fromAccountId || !transfer.toAccountId || transfer.fromAccountId === transfer.toAccountId || !(amount > 0)) {
+    if (
+      !transfer.fromAccountId ||
+      !transfer.toAccountId ||
+      transfer.fromAccountId === transfer.toAccountId ||
+      !(amount > 0)
+    ) {
       return;
     }
 
@@ -98,254 +112,329 @@ export function Accounts({ accounts, accountBalances, onAddAccount, onDeleteAcco
       date: transfer.date,
     });
 
-    setTransfer(prev => ({
+    setTransfer((prev) => ({
       ...prev,
       amount: '',
       description: '',
     }));
+    setIsTransferOpen(false);
   };
 
   return (
-    <div className="relative mb-8">
-      <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 rounded-2xl blur-xl" />
-      
-      <div className="relative rounded-2xl p-6" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-        <div className="flex items-center justify-between mb-6">
+    <div className="space-y-6 animate-fade-in-up">
+      {/* Header Banner */}
+      <div className="glass p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className="p-3 rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <Landmark className="w-6 h-6" />
+          </div>
           <div>
-            <h2 className="text-xl font-bold flex items-center gap-3" style={{ color: 'var(--text-primary)' }}>
-              <div className="p-2 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 rounded-2xl">
-                <Landmark className="w-5 h-5 text-emerald-400" />
-              </div>
-              Minhas Contas
+            <h2 className="text-lg font-display font-bold" style={{ color: 'var(--text-primary)' }}>
+              Contas & Carteiras
             </h2>
-            <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
-              Saldo total: <span className="text-emerald-400 font-semibold">{formatCurrency(totalBalance)}</span>
+            <p className="text-xs text-[var(--text-muted)]">
+              Patrimônio acumulado:{' '}
+              <span className="font-semibold text-emerald-400 font-mono">{formatCurrency(totalBalance)}</span>
             </p>
           </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {accounts.length >= 2 && (
+            <button
+              onClick={() => setIsTransferOpen(!isTransferOpen)}
+              className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-semibold border border-indigo-500/20 bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 transition-all"
+            >
+              <ArrowRightLeft className="w-4 h-4" />
+              Transferir
+            </button>
+          )}
+
           <button
             onClick={() => setIsAdding(!isAdding)}
-            className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-white rounded-2xl transition-all"
+            className="flex items-center gap-2 px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-emerald-500/20"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4 stroke-[3]" />
             Nova Conta
           </button>
         </div>
+      </div>
 
-        {isAdding && (
-          <form onSubmit={handleSubmit} className="mb-6 p-4 rounded-2xl space-y-4" style={{ background: 'var(--bg-tertiary)' }}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Nome da Conta</label>
-                <input
-                  type="text"
-                  value={newAccount.name}
-                  onChange={(e) => setNewAccount({ ...newAccount, name: e.target.value })}
-                  placeholder="Ex: Nubank, Itaú..."
-                  className="w-full px-4 py-2 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
-                  style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Tipo</label>
-                <select
-                  value={newAccount.type}
-                  onChange={(e) => setNewAccount({ ...newAccount, type: e.target.value as Account['type'] })}
-                  className="w-full px-4 py-2 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
-                  style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
-                >
-                  {ACCOUNT_TYPES.map((type) => (
-                    <option key={type.type} value={type.type}>{type.label}</option>
-                  ))}
-                </select>
-              </div>
+      {/* New Account Form */}
+      {isAdding && (
+        <form onSubmit={handleSubmit} className="glass p-5 rounded-2xl space-y-4 animate-fade-in">
+          <h3 className="text-sm font-display font-bold" style={{ color: 'var(--text-primary)' }}>
+            Cadastrar Nova Conta
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1">
+                Nome da Conta
+              </label>
+              <input
+                type="text"
+                value={newAccount.name}
+                onChange={(e) => setNewAccount({ ...newAccount, name: e.target.value })}
+                placeholder="Ex: Nubank, Itaú, Carteira..."
+                className="w-full px-3.5 py-2.5 text-sm rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] focus:outline-none focus:border-emerald-500/50"
+                required
+              />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Cor</label>
-              <div className="flex gap-2">
-                {ACCOUNT_COLORS.map((color) => (
-                  <button
-                    key={color.value}
-                    type="button"
-                    onClick={() => setNewAccount({ ...newAccount, color: color.value })}
-                    className={`w-8 h-8 rounded-2xl transition-all ${
-                      newAccount.color === color.value ? 'ring-2 ring-white scale-110' : 'hover:scale-105'
-                    }`}
-                    style={{ backgroundColor: color.value }}
-                    title={color.name}
-                  />
-                ))}
-              </div>
-            </div>
-            <div className="flex gap-3">
-              <button
-                type="submit"
-                className="flex-1 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-medium rounded-2xl hover:from-emerald-400 hover:to-teal-400 transition-all"
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1">
+                Tipo de Conta
+              </label>
+              <select
+                value={newAccount.type}
+                onChange={(e) => setNewAccount({ ...newAccount, type: e.target.value as Account['type'] })}
+                className="w-full px-3.5 py-2.5 text-sm rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] focus:outline-none focus:border-emerald-500/50 cursor-pointer"
               >
-                Criar Conta
-              </button>
+                {ACCOUNT_TYPES.map((type) => (
+                  <option key={type.type} value={type.type}>
+                    {type.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1">
+              Cor do Card
+            </label>
+            <div className="flex items-center gap-2">
+              {ACCOUNT_COLORS.map((color) => (
+                <button
+                  key={color.value}
+                  type="button"
+                  onClick={() => setNewAccount({ ...newAccount, color: color.value })}
+                  className={`w-7 h-7 rounded-xl flex items-center justify-center transition-all ${
+                    newAccount.color === color.value ? 'ring-2 ring-white scale-110' : 'hover:scale-105'
+                  }`}
+                  style={{ backgroundColor: color.value }}
+                >
+                  {newAccount.color === color.value && <Check className="w-3.5 h-3.5 text-black stroke-[3]" />}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-[var(--border-color)]">
+            <button
+              type="button"
+              onClick={() => setIsAdding(false)}
+              className="px-4 py-2 rounded-xl text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-emerald-500 hover:bg-emerald-600 shadow-md shadow-emerald-500/20"
+            >
+              Salvar Conta
+            </button>
+          </div>
+        </form>
+      )}
+
+      {/* Transfer Form */}
+      {isTransferOpen && accounts.length >= 2 && (
+        <form onSubmit={handleTransfer} className="glass p-5 rounded-2xl space-y-4 border border-indigo-500/30 animate-fade-in">
+          <div className="flex items-center gap-2.5 pb-2 border-b border-[var(--border-color)]">
+            <ArrowRightLeft className="w-5 h-5 text-indigo-400" />
+            <h3 className="text-sm font-display font-bold text-[var(--text-primary)]">
+              Transferência entre Contas
+            </h3>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+            <div>
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1">
+                Conta de Origem
+              </label>
+              <select
+                value={transfer.fromAccountId}
+                onChange={(e) => setTransfer({ ...transfer, fromAccountId: e.target.value })}
+                className="w-full px-3.5 py-2.5 text-sm rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] focus:outline-none cursor-pointer"
+                required
+              >
+                {accounts.map((account) => (
+                  <option key={account.id} value={account.id}>
+                    {account.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1">
+                Conta de Destino
+              </label>
+              <select
+                value={transfer.toAccountId}
+                onChange={(e) => setTransfer({ ...transfer, toAccountId: e.target.value })}
+                className="w-full px-3.5 py-2.5 text-sm rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] focus:outline-none cursor-pointer"
+                required
+              >
+                {accounts.map((account) => (
+                  <option key={account.id} value={account.id}>
+                    {account.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1">
+                Valor
+              </label>
+              <input
+                type="number"
+                min="0.01"
+                step="0.01"
+                value={transfer.amount}
+                onChange={(e) => setTransfer({ ...transfer, amount: e.target.value })}
+                placeholder="0,00"
+                className="w-full px-3.5 py-2.5 text-sm font-mono font-bold rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] focus:outline-none"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1">
+                Data
+              </label>
+              <input
+                type="date"
+                value={transfer.date}
+                onChange={(e) => setTransfer({ ...transfer, date: e.target.value })}
+                className="w-full px-3.5 py-2.5 text-sm rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] focus:outline-none cursor-pointer"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between pt-2 border-t border-[var(--border-color)]">
+            <input
+              type="text"
+              value={transfer.description}
+              onChange={(e) => setTransfer({ ...transfer, description: e.target.value })}
+              placeholder="Descrição ou observação (opcional)"
+              className="flex-1 max-w-md px-3.5 py-2 text-xs rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)]"
+            />
+
+            <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={() => setIsAdding(false)}
-                className="px-4 py-2 bg-[#1a1a2e] text-[#a0a0b8] rounded-2xl hover:text-white transition-all"
+                onClick={() => setIsTransferOpen(false)}
+                className="px-3.5 py-2 rounded-xl text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)]"
               >
                 Cancelar
               </button>
-            </div>
-          </form>
-        )}
-
-        {accounts.length >= 2 && (
-          <form onSubmit={handleTransfer} className="mb-6 p-4 rounded-2xl space-y-4" style={{ background: 'var(--bg-tertiary)' }}>
-            <div className="flex items-center gap-2">
-              <ArrowRightLeft className="w-4 h-4 text-indigo-400" />
-              <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Transferencia entre contas</h3>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Origem</label>
-                <select
-                  value={transfer.fromAccountId}
-                  onChange={(e) => setTransfer({ ...transfer, fromAccountId: e.target.value })}
-                  className="w-full px-4 py-2 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-                  style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
-                  required
-                >
-                  {accounts.map((account) => (
-                    <option key={account.id} value={account.id}>{account.name}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Destino</label>
-                <select
-                  value={transfer.toAccountId}
-                  onChange={(e) => setTransfer({ ...transfer, toAccountId: e.target.value })}
-                  className="w-full px-4 py-2 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-                  style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
-                  required
-                >
-                  {accounts.map((account) => (
-                    <option key={account.id} value={account.id}>{account.name}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Valor</label>
-                <input
-                  type="number"
-                  min="0.01"
-                  step="0.01"
-                  value={transfer.amount}
-                  onChange={(e) => setTransfer({ ...transfer, amount: e.target.value })}
-                  placeholder="0,00"
-                  className="w-full px-4 py-2 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-                  style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Data</label>
-                <input
-                  type="date"
-                  value={transfer.date}
-                  onChange={(e) => setTransfer({ ...transfer, date: e.target.value })}
-                  className="w-full px-4 py-2 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-                  style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
-                  required
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-3">
-              <input
-                type="text"
-                value={transfer.description}
-                onChange={(e) => setTransfer({ ...transfer, description: e.target.value })}
-                placeholder="Descricao (opcional)"
-                className="w-full px-4 py-2 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-                style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
-              />
               <button
                 type="submit"
                 disabled={transfer.fromAccountId === transfer.toAccountId}
-                className="px-5 py-2 bg-indigo-500 hover:bg-indigo-400 text-white rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-indigo-500 hover:bg-indigo-600 shadow-md shadow-indigo-500/20 disabled:opacity-50"
               >
-                Transferir
+                Confirmar Transferência
               </button>
             </div>
-          </form>
-        )}
+          </div>
+        </form>
+      )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-          {/* All accounts option */}
-          <button
-            onClick={() => onSelectAccount(null)}
-            className={`p-4 rounded-2xl border transition-all text-left ${
-              selectedAccount === null
-                ? 'bg-emerald-500/10 border-emerald-500/30'
-                : ''
-            }`}
-            style={selectedAccount !== null ? { background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)' } : undefined}
-          >
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
-                <Landmark className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>Todas as Contas</h3>
-                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{accounts.length} contas</p>
-              </div>
+      {/* Account Cards Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+        {/* All Accounts Pill */}
+        <div
+          onClick={() => onSelectAccount(null)}
+          className={`glass p-5 rounded-2xl cursor-pointer card-hover flex flex-col justify-between border ${
+            selectedAccount === null
+              ? 'border-emerald-500/40 bg-emerald-500/5'
+              : 'border-[var(--border-color)]'
+          }`}
+        >
+          <div className="flex items-center gap-3.5 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center text-black shadow-md shadow-emerald-500/20">
+              <Landmark className="w-5 h-5 font-bold" />
             </div>
-            <p className="text-lg font-bold text-emerald-400">{formatCurrency(totalBalance)}</p>
-          </button>
+            <div>
+              <h3 className="font-display font-bold text-sm" style={{ color: 'var(--text-primary)' }}>
+                Todas as Contas
+              </h3>
+              <p className="text-xs text-[var(--text-muted)]">{accounts.length} contas ativas</p>
+            </div>
+          </div>
 
-          {accounts.map((account) => {
-            const Icon = getAccountIcon(account.type);
-            const balance = accountBalances[account.id] || 0;
+          <div>
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block">
+              Saldo Consolidado
+            </span>
+            <p className="text-xl font-mono font-bold text-emerald-400 mt-0.5">
+              {formatCurrency(totalBalance)}
+            </p>
+          </div>
+        </div>
 
-            return (
-              <div
-                key={account.id}
-                onClick={() => onSelectAccount(account.id)}
-                className={`relative p-4 rounded-2xl border cursor-pointer transition-all group ${
-                  selectedAccount === account.id
-                    ? 'bg-[#252542] border-emerald-500/30'
-                    : 'bg-[#252542] border-[#2a2a45] hover:border-[#3a3a55]'
-                }`}
-              >
-                {!account.isDefault && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDeleteAccount(account.id);
-                    }}
-                    className="absolute top-2 right-2 p-1.5 text-[#6b6b8a] hover:text-red-400 hover:bg-red-500/10 rounded-2xl transition-all opacity-0 group-hover:opacity-100"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                )}
-                
-                <div className="flex items-center gap-3 mb-2">
-                  <div
-                    className="w-10 h-10 rounded-2xl flex items-center justify-center"
-                    style={{ backgroundColor: `${account.color}20` }}
-                  >
-                    <Icon className="w-5 h-5" style={{ color: account.color }} />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-white">{account.name}</h3>
-                    <p className="text-xs text-[#6b6b8a]">
-                      {ACCOUNT_TYPES.find(t => t.type === account.type)?.label}
-                    </p>
-                  </div>
+        {/* Individual Accounts */}
+        {accounts.map((account) => {
+          const Icon = getAccountIcon(account.type);
+          const balance = accountBalances[account.id] || 0;
+          const isSelected = selectedAccount === account.id;
+
+          return (
+            <div
+              key={account.id}
+              onClick={() => onSelectAccount(account.id)}
+              className={`glass p-5 rounded-2xl cursor-pointer card-hover flex flex-col justify-between relative group border ${
+                isSelected ? 'border-emerald-500/50 bg-emerald-500/5 shadow-lg' : 'border-[var(--border-color)]'
+              }`}
+            >
+              {!account.isDefault && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDeleteAccount(account.id);
+                  }}
+                  className="absolute top-3 right-3 p-2 rounded-xl text-[var(--text-muted)] hover:text-rose-400 hover:bg-rose-500/10 opacity-0 group-hover:opacity-100 transition-all"
+                  title="Excluir conta"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              )}
+
+              <div className="flex items-center gap-3.5 mb-4">
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center border border-white/10"
+                  style={{ backgroundColor: `${account.color}25` }}
+                >
+                  <Icon className="w-5 h-5" style={{ color: account.color }} />
                 </div>
-                <p className={`text-lg font-bold ${balance >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                <div>
+                  <h3 className="font-display font-bold text-sm" style={{ color: 'var(--text-primary)' }}>
+                    {account.name}
+                  </h3>
+                  <p className="text-xs text-[var(--text-muted)]">
+                    {ACCOUNT_TYPES.find((t) => t.type === account.type)?.label}
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block">
+                  Saldo Disponível
+                </span>
+                <p
+                  className={`text-xl font-mono font-bold mt-0.5 ${
+                    balance >= 0 ? 'text-emerald-400' : 'text-rose-400'
+                  }`}
+                >
                   {formatCurrency(balance)}
                 </p>
               </div>
-            );
-          })}
-        </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

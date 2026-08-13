@@ -78,7 +78,7 @@ export function Charts({ monthlyData, categoryData }: ChartsProps) {
         </div>
 
         <div className="h-64">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minWidth={0}>
             <BarChart data={monthlyData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" vertical={false} />
               <XAxis
@@ -117,7 +117,7 @@ export function Charts({ monthlyData, categoryData }: ChartsProps) {
 
         <div className="h-64">
           {categoryData.expense.length > 0 ? (
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
               <PieChart>
                 <Pie
                   data={categoryData.expense}

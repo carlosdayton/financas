@@ -273,7 +273,7 @@ export function AdvancedCharts({ transactions }: AdvancedChartsProps) {
           </div>
 
           <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
               <AreaChart data={balanceTrend}>
                 <defs>
                   <linearGradient id="balanceGradient" x1="0" y1="0" x2="0" y2="1">
@@ -326,7 +326,7 @@ export function AdvancedCharts({ transactions }: AdvancedChartsProps) {
           </div>
 
           <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
               <ComposedChart data={yearComparison}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" vertical={false} />
                 <XAxis

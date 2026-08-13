@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Trash2, Pencil, ChevronDown, ChevronUp } from 'lucide-react';
+import { Trash2, Pencil, ChevronDown, ChevronUp, ArrowUpRight, ArrowDownRight, Repeat } from 'lucide-react';
 import type { Transaction } from '../types/finance';
 import { usePrivacy } from '../contexts/PrivacyContext';
 import { getTodayLocalISO } from '../utils/date';
@@ -41,8 +41,16 @@ export function TransactionList({ transactions, onDelete, onEdit }: TransactionL
 
   if (transactions.length === 0) {
     return (
-      <div className="py-14 text-center border border-dashed border-[var(--border-color)] rounded-lg">
-        <p className="text-sm text-[var(--text-muted)]">Nenhuma transação encontrada</p>
+      <div className="glass py-16 text-center rounded-2xl flex flex-col items-center justify-center">
+        <div className="w-12 h-12 rounded-2xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] flex items-center justify-center text-[var(--text-muted)] mb-3">
+          <ArrowUpRight className="w-6 h-6" />
+        </div>
+        <h4 className="text-base font-display font-semibold" style={{ color: 'var(--text-primary)' }}>
+          Nenhum lançamento encontrado
+        </h4>
+        <p className="text-xs text-[var(--text-muted)] mt-1 max-w-xs">
+          Tente alterar seus filtros de pesquisa ou adicione uma nova transação.
+        </p>
       </div>
     );
   }
@@ -50,114 +58,140 @@ export function TransactionList({ transactions, onDelete, onEdit }: TransactionL
   const groups = groupByDate(transactions);
 
   return (
-    <div className="border border-[var(--border-color)] rounded-lg overflow-hidden divide-y divide-[var(--border-color)]">
+    <div className="space-y-4">
       {groups.map(([date, group]) => {
         const dayBalance = group
-          .filter(t => !t.isTransfer)
+          .filter((t) => !t.isTransfer)
           .reduce((s, t) => s + (t.type === 'income' ? t.amount : -t.amount), 0);
 
         return (
-          <div key={date}>
+          <div key={date} className="glass rounded-2xl overflow-hidden border border-[var(--border-color)]">
             {/* Date header */}
-            <div className="px-3 sm:px-4 py-2 flex items-center justify-between gap-2 bg-[var(--bg-secondary)]">
-              <span className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
+            <div className="px-4 py-2.5 flex items-center justify-between gap-2 bg-[var(--bg-tertiary)]/50 border-b border-[var(--border-color)]">
+              <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] capitalize">
                 {formatDateLabel(date)}
               </span>
-              <span className={`text-xs font-mono font-bold ${dayBalance >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
-                {dayBalance >= 0 ? '+' : ''}{formatCurrency(dayBalance)}
+              <span
+                className={`text-xs font-mono font-bold ${
+                  dayBalance >= 0 ? 'text-emerald-400' : 'text-rose-400'
+                }`}
+              >
+                {dayBalance >= 0 ? '+' : ''}
+                {formatCurrency(dayBalance)}
               </span>
             </div>
 
-            {/* Transactions */}
-            {group.map((t) => {
-              const isExpanded = expandedId === t.id;
-              const stripColor = t.isTransfer
-                ? 'bg-[var(--text-muted)]'
-                : t.type === 'income'
-                ? 'bg-emerald-500'
-                : 'bg-red-500';
-              const amountColor = t.isTransfer
-                ? 'text-[var(--text-secondary)]'
-                : t.type === 'income'
-                ? 'text-emerald-500'
-                : 'text-[var(--text-primary)]';
+            {/* Transaction Rows */}
+            <div className="divide-y divide-[var(--border-color)]">
+              {group.map((t) => {
+                const isExpanded = expandedId === t.id;
+                const isIncome = t.type === 'income';
 
-              return (
-                <div
-                  key={t.id}
-                  className="group flex items-start px-3 sm:px-4 py-3 hover:bg-[var(--bg-secondary)] transition-colors"
-                >
-                  {/* Left color strip */}
-                  <div className={`w-0.5 self-stretch mr-3 rounded-full flex-shrink-0 mt-0.5 ${stripColor}`} />
-
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2 sm:gap-3">
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-[var(--text-primary)] truncate leading-snug">
-                          {t.description}
-                        </p>
-                        <p className="text-xs text-[var(--text-muted)] mt-0.5">
-                          {t.category}
-                          {t.isRecurring && (
-                            <span className="ml-2 text-[var(--accent-secondary)]">· recorrente</span>
-                          )}
-                        </p>
+                return (
+                  <div
+                    key={t.id}
+                    className="p-3.5 sm:px-5 flex items-center justify-between gap-3 hover:bg-[var(--bg-tertiary)]/30 transition-all group"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      {/* Icon Badge */}
+                      <div
+                        className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 border ${
+                          t.isTransfer
+                            ? 'bg-sky-500/10 text-sky-400 border-sky-500/20'
+                            : isIncome
+                            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                            : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                        }`}
+                      >
+                        {t.isTransfer ? (
+                          <Repeat className="w-4 h-4" />
+                        ) : isIncome ? (
+                          <ArrowUpRight className="w-4.5 h-4.5" />
+                        ) : (
+                          <ArrowDownRight className="w-4.5 h-4.5" />
+                        )}
                       </div>
 
-                      <div className="flex flex-col items-end gap-1 flex-shrink-0 sm:flex-row sm:items-center sm:gap-0.5">
-                        <span className={`max-w-[8.5rem] truncate text-right text-xs font-mono font-bold sm:max-w-none sm:text-sm ${amountColor}`}>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-semibold text-[var(--text-primary)] truncate">
+                            {t.description}
+                          </p>
+                          {t.isRecurring && (
+                            <span className="px-1.5 py-0.5 text-[10px] font-bold rounded-md bg-sky-500/10 text-sky-400 border border-sky-500/20">
+                              Recorrente
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-xs text-[var(--text-muted)] font-medium">
+                            {t.category}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Amount & Actions */}
+                    <div className="flex items-center gap-3 flex-shrink-0">
+                      <div className="text-right">
+                        <span
+                          className={`text-sm sm:text-base font-mono font-bold block ${
+                            t.isTransfer
+                              ? 'text-[var(--text-secondary)]'
+                              : isIncome
+                              ? 'text-emerald-400'
+                              : 'text-[var(--text-primary)]'
+                          }`}
+                        >
                           {t.isTransfer
                             ? formatCurrency(t.amount)
-                            : `${t.type === 'income' ? '+' : '-'}${formatCurrency(t.amount)}`}
+                            : `${isIncome ? '+' : '-'}${formatCurrency(t.amount)}`}
                         </span>
+                      </div>
 
+                      <div className="flex items-center gap-1">
                         {t.notes && (
                           <button
                             onClick={() => setExpandedId(isExpanded ? null : t.id)}
-                            className="p-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+                            className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] transition-colors"
+                            title="Ver detalhes"
                           >
-                            {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                            {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                           </button>
                         )}
 
                         {!t.isTransfer && (
                           <button
                             onClick={() => onEdit(t)}
-                            className="p-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+                            className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors"
                             title="Editar"
                           >
-                            <Pencil className="w-3.5 h-3.5" />
+                            <Pencil className="w-4 h-4" />
                           </button>
                         )}
 
                         <button
                           onClick={() => onDelete(t.id)}
-                          className="p-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 text-[var(--text-muted)] hover:text-red-500 transition-colors"
+                          className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
                           title="Excluir"
                         >
-                          <Trash2 className="w-3.5 h-3.5" />
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
-
-                    {t.notes && isExpanded && (
-                      <p className="mt-2 text-xs text-[var(--text-secondary)] italic border-l-2 border-[var(--border-color)] pl-2.5">
-                        {t.notes}
-                      </p>
-                    )}
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         );
       })}
 
       {transactions.length >= 50 && (
-        <div className="px-4 py-3 text-center bg-[var(--bg-secondary)]">
-          <p className="text-xs text-[var(--text-muted)]">Mostrando as 50 transações mais recentes</p>
-        </div>
+        <p className="text-center text-xs text-[var(--text-muted)] py-2">
+          Exibindo as 50 transações mais recentes
+        </p>
       )}
     </div>
   );

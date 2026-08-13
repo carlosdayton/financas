@@ -76,10 +76,10 @@ export function ConfirmModal({
         </p>
 
         {/* Buttons */}
-        <div className="flex gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:flex sm:items-center">
           <button
             onClick={onCancel}
-            className="flex-1 py-3 px-4 font-medium rounded-2xl transition-all"
+            className="w-full sm:flex-1 py-3 px-4 font-medium rounded-2xl transition-all"
             style={{ background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}
           >
             {cancelText}

@@ -82,7 +82,7 @@ export function EditTransactionModal({
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           {/* Type Selector */}
           {!transaction.isTransfer && (
-            <div className="flex gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:flex sm:items-center">
               <button
                 type="button"
                 onClick={() => { setType('expense'); setCategory(''); }}
@@ -110,9 +110,9 @@ export function EditTransactionModal({
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Description */}
-            <div className="col-span-2 space-y-1.5">
+            <div className="sm:col-span-2 space-y-1.5">
               <label className="block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
                 Descrição
               </label>
@@ -163,7 +163,7 @@ export function EditTransactionModal({
 
             {/* Category */}
             {!transaction.isTransfer && (
-              <div className="col-span-2 space-y-1.5">
+              <div className="sm:col-span-2 space-y-1.5">
                 <label className="block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
                   Categoria
                 </label>
@@ -185,7 +185,7 @@ export function EditTransactionModal({
             )}
 
             {/* Notes */}
-            <div className="col-span-2 space-y-1.5">
+            <div className="sm:col-span-2 space-y-1.5">
               <label className="block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
                 Notas <span className="text-xs" style={{ color: 'var(--text-muted)' }}>(opcional)</span>
               </label>
@@ -201,18 +201,18 @@ export function EditTransactionModal({
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3 pt-2">
+          <div className="grid grid-cols-1 gap-3 pt-2 sm:flex sm:items-center">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2.5 rounded-2xl font-medium transition-colors"
+              className="w-full sm:flex-1 py-2.5 rounded-2xl font-medium transition-colors"
               style={{ background: 'var(--bg-tertiary)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="flex-1 py-2.5 rounded-2xl font-bold text-white transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-400 hover:to-purple-400 shadow-lg shadow-indigo-500/25"
+              className="w-full sm:flex-1 py-2.5 rounded-2xl font-bold text-white transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-400 hover:to-purple-400 shadow-lg shadow-indigo-500/25"
             >
               <Save className="w-4 h-4" />
               Salvar

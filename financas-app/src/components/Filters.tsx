@@ -16,21 +16,22 @@ export function Filters({ transactions, categories, onFilterChange }: FiltersPro
 
   const availableMonths = useMemo(() => {
     const months = new Set<string>();
-    transactions.forEach(t => months.add(t.date.substring(0, 7)));
+    transactions.forEach((t) => months.add(t.date.substring(0, 7)));
     return Array.from(months).sort().reverse();
   }, [transactions]);
 
   useEffect(() => {
     let filtered = [...transactions];
     if (searchTerm) {
-      filtered = filtered.filter(t =>
-        t.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        t.category.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(
+        (t) =>
+          t.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          t.category.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-    if (selectedType !== 'all') filtered = filtered.filter(t => t.type === selectedType);
-    if (selectedCategory !== 'all') filtered = filtered.filter(t => t.category === selectedCategory);
-    if (selectedMonth !== 'all') filtered = filtered.filter(t => t.date.startsWith(selectedMonth));
+    if (selectedType !== 'all') filtered = filtered.filter((t) => t.type === selectedType);
+    if (selectedCategory !== 'all') filtered = filtered.filter((t) => t.category === selectedCategory);
+    if (selectedMonth !== 'all') filtered = filtered.filter((t) => t.date.startsWith(selectedMonth));
     onFilterChange(filtered);
   }, [transactions, searchTerm, selectedType, selectedCategory, selectedMonth, onFilterChange]);
 
@@ -52,74 +53,77 @@ export function Filters({ transactions, categories, onFilterChange }: FiltersPro
   };
 
   return (
-    <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center">
-      {/* Search */}
-      <div className="relative col-span-2 sm:col-span-1 sm:flex-1 sm:min-w-40">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+    <div className="glass p-3.5 rounded-2xl flex flex-col md:flex-row md:items-center gap-3">
+      {/* Search Input */}
+      <div className="relative flex-1 min-w-[200px]">
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
         <input
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Buscar..."
-          className="w-full pl-9 pr-3 py-2 text-sm rounded-md bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-secondary)]"
+          placeholder="Buscar lançamento ou categoria..."
+          className="w-full pl-10 pr-3.5 py-2 text-xs sm:text-sm rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-emerald-500/50 transition-colors"
         />
       </div>
 
-      {/* Type pills */}
-      <div className="col-span-2 flex gap-0.5 p-1 rounded-md bg-[var(--bg-tertiary)] border border-[var(--border-color)] sm:col-span-1">
-        {(['all', 'income', 'expense'] as const).map(t => (
-          <button
-            key={t}
-            onClick={() => setSelectedType(t)}
-            className={`flex-1 px-2 sm:px-3 py-1 text-xs font-medium rounded transition-colors ${
-              selectedType === t
-                ? t === 'income'
-                  ? 'bg-emerald-500 text-white'
-                  : t === 'expense'
-                  ? 'bg-red-500 text-white'
-                  : 'bg-[var(--bg-card)] text-[var(--text-primary)] shadow-sm'
-                : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
-            }`}
-          >
-            {t === 'all' ? 'Tudo' : t === 'income' ? 'Receitas' : 'Despesas'}
-          </button>
-        ))}
-      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        {/* Type pills */}
+        <div className="flex items-center gap-1 p-1 rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)]">
+          {(['all', 'income', 'expense'] as const).map((t) => (
+            <button
+              key={t}
+              onClick={() => setSelectedType(t)}
+              className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+                selectedType === t
+                  ? t === 'income'
+                    ? 'bg-emerald-500 text-white shadow-sm'
+                    : t === 'expense'
+                    ? 'bg-rose-500 text-white shadow-sm'
+                    : 'bg-[var(--bg-card)] text-[var(--text-primary)] shadow-sm'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+              }`}
+            >
+              {t === 'all' ? 'Tudo' : t === 'income' ? 'Receitas' : 'Despesas'}
+            </button>
+          ))}
+        </div>
 
-      {/* Category */}
-      <select
-        value={selectedCategory}
-        onChange={(e) => setSelectedCategory(e.target.value)}
-        className="w-full min-w-0 px-3 py-2 text-sm rounded-md bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)] focus:outline-none cursor-pointer sm:w-auto"
-      >
-        <option value="all">Categoria</option>
-        {categories.map((cat) => (
-          <option key={cat.id} value={cat.name}>{cat.name}</option>
-        ))}
-      </select>
-
-      {/* Month */}
-      <select
-        value={selectedMonth}
-        onChange={(e) => setSelectedMonth(e.target.value)}
-        className="w-full min-w-0 px-3 py-2 text-sm rounded-md bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)] focus:outline-none cursor-pointer sm:w-auto"
-      >
-        <option value="all">Todo período</option>
-        {availableMonths.map((month) => (
-          <option key={month} value={month}>{formatMonth(month)}</option>
-        ))}
-      </select>
-
-      {/* Clear */}
-      {hasActiveFilters && (
-        <button
-          onClick={clearFilters}
-          className="p-2 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] transition-colors"
-          title="Limpar filtros"
+        {/* Category Select */}
+        <select
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+          className="px-3 py-2 text-xs sm:text-sm rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] focus:outline-none cursor-pointer"
         >
-          <X className="w-4 h-4" />
-        </button>
-      )}
+          <option value="all">Todas Categorias</option>
+          {categories.map((cat) => (
+            <option key={cat.id} value={cat.name}>{cat.name}</option>
+          ))}
+        </select>
+
+        {/* Month Select */}
+        <select
+          value={selectedMonth}
+          onChange={(e) => setSelectedMonth(e.target.value)}
+          className="px-3 py-2 text-xs sm:text-sm rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] focus:outline-none cursor-pointer"
+        >
+          <option value="all">Todo Período</option>
+          {availableMonths.map((month) => (
+            <option key={month} value={month}>{formatMonth(month)}</option>
+          ))}
+        </select>
+
+        {/* Clear Button */}
+        {hasActiveFilters && (
+          <button
+            onClick={clearFilters}
+            className="flex items-center gap-1 px-3 py-2 text-xs font-semibold rounded-xl border border-rose-500/20 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 transition-colors"
+            title="Limpar filtros"
+          >
+            <X className="w-3.5 h-3.5" />
+            Limpar
+          </button>
+        )}
+      </div>
     </div>
   );
 }

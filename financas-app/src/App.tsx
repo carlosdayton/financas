@@ -1,4 +1,6 @@
+
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import { Search, Bell, Sparkles } from 'lucide-react';
 import { useFinance } from './hooks/useFinance';
 import { useToast } from './hooks/useToast';
 import { useTheme } from './hooks/useTheme';
@@ -15,8 +17,9 @@ import { ThemeToggle } from './components/ThemeToggle';
 import { PrivacyToggle } from './components/PrivacyToggle';
 import { PWAInstallPrompt, OfflineIndicator, UpdatePrompt } from './components/PWAStatus';
 import { PinLock } from './components/PinLock';
-import type { AlertPreferencesState } from './components/AlertPreferences';
+import { AlertPreferences, type AlertPreferencesState } from './components/AlertPreferences';
 import { CommandPalette } from './components/CommandPalette';
+import { QuickAddAIModal } from './components/QuickAddAIModal';
 import { DashboardPage } from './pages/DashboardPage';
 import { TransactionsPage } from './pages/TransactionsPage';
 import { AccountsPage } from './pages/AccountsPage';
@@ -107,6 +110,8 @@ function AppInner() {
   const [transactionToDelete, setTransactionToDelete] = useState<string | null>(null);
   const [selectedAccount, setSelectedAccount] = useState<string | null>(null);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [alertPreferencesOpen, setAlertPreferencesOpen] = useState(false);
+  const [quickAddAIOpen, setQuickAddAIOpen] = useState(false);
   const [alertPreferences, setAlertPreferences] = useState<AlertPreferencesState>(() => {
     const stored = localStorage.getItem(ALERT_PREFERENCES_KEY);
     if (!stored) return defaultAlertPreferences;
@@ -433,11 +438,13 @@ function AppInner() {
           <TransactionsPage
             transactions={transactions}
             categories={categories}
+            accounts={accounts}
             filteredTransactions={filteredTransactions ?? transactions}
             onFilterChange={setFilteredTransactions}
             onAddTransaction={handleAddTransaction}
             onDeleteTransaction={handleDeleteClick}
             onEditTransaction={handleEditTransaction}
+            onAddInstallment={addInstallment}
           />
         );
       case 'accounts':
@@ -551,20 +558,54 @@ function AppInner() {
 
       <main className="flex-1 min-w-0 overflow-auto relative">
         <header
-          className="sticky top-0 z-30 px-3 py-3 md:px-8 md:py-4 transition-all duration-300"
+          className="sticky top-0 z-30 px-4 py-3 md:px-8 md:py-4 transition-all duration-300"
           style={{ 
-            background: 'rgba(var(--bg-primary-rgb), 0.78)', 
-            backdropFilter: 'blur(12px)',
-            WebkitBackdropFilter: 'blur(12px)',
+            background: 'rgba(var(--bg-primary-rgb), 0.82)', 
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
             borderBottom: '1px solid var(--border-color)' 
           }}
         >
-          <div className="flex items-center justify-between gap-2 animate-fade-in-up">
-            <div className="min-w-0">
-              <h1 className="text-xl md:text-3xl font-display font-semibold tracking-tight truncate" style={{ color: 'var(--text-primary)' }}>{title}</h1>
-              <p className="text-xs md:text-sm font-medium mt-0.5 hidden sm:block" style={{ color: 'var(--text-muted)' }}>{subtitle}</p>
+          <div className="flex items-center justify-between gap-3 animate-fade-in-up">
+            <div className="min-w-0 flex-1 flex items-center gap-4">
+              <div>
+                <h1 className="text-xl md:text-2xl font-display font-bold tracking-tight truncate" style={{ color: 'var(--text-primary)' }}>{title}</h1>
+                <p className="text-xs font-medium hidden sm:block mt-0.5" style={{ color: 'var(--text-muted)' }}>{subtitle}</p>
+              </div>
+
+              {/* Quick Command Palette Search Trigger */}
+              <button
+                onClick={() => setCommandPaletteOpen(true)}
+                className="hidden md:flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-medium border border-[var(--border-color)] bg-[var(--bg-card)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-emerald-500/30 transition-all duration-200 shadow-sm min-w-[240px]"
+              >
+                <Search className="w-4 h-4 text-emerald-400" />
+                <span className="flex-1 text-left">Buscar ou comando...</span>
+                <kbd className="px-1.5 py-0.5 text-[10px] font-mono rounded bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-secondary)]">
+                  Ctrl K
+                </kbd>
+              </button>
             </div>
-            <div className="flex items-center gap-1 md:gap-3 flex-shrink-0">
+
+            <div className="flex items-center gap-1.5 md:gap-2.5 flex-shrink-0">
+              {/* Quick Add AI Trigger Button */}
+              <button
+                onClick={() => setQuickAddAIOpen(true)}
+                title="Lançamento Rápido com IA"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-all duration-200 shadow-sm"
+              >
+                <Sparkles className="w-4 h-4 text-emerald-400" />
+                <span className="hidden sm:inline">Entrada IA</span>
+              </button>
+
+              {/* Alert preferences modal trigger */}
+              <button
+                onClick={() => setAlertPreferencesOpen(true)}
+                title="Configurações de Alertas"
+                className="p-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-emerald-400 hover:border-emerald-500/30 transition-all duration-200"
+              >
+                <Bell className="w-4.5 h-4.5" />
+              </button>
+
               <PrivacyToggle />
               <ThemeToggle isDark={isDark} onToggle={toggleTheme} />
               <DataExport
@@ -576,8 +617,7 @@ function AppInner() {
               {hasPin && (
                 <button
                   onClick={logout}
-                  className="hidden sm:inline-flex px-4 py-2 rounded-2xl text-sm font-semibold transition-all duration-300 hover:bg-red-500/10 hover:text-red-400 hover:shadow-lg hover:shadow-red-500/10"
-                  style={{ color: 'var(--text-secondary)' }}
+                  className="hidden sm:inline-flex px-3.5 py-2 rounded-xl text-xs font-semibold border border-rose-500/20 text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 transition-all duration-200"
                 >
                   Bloquear
                 </button>
@@ -585,6 +625,43 @@ function AppInner() {
             </div>
           </div>
         </header>
+
+        {/* Quick Add AI Modal */}
+        <QuickAddAIModal
+          isOpen={quickAddAIOpen}
+          onClose={() => setQuickAddAIOpen(false)}
+          categories={categories}
+          accounts={accounts}
+          onConfirm={(data) => {
+            if (data.isInstallment && data.totalInstallments && data.totalInstallments > 1) {
+              addInstallment({
+                description: data.description,
+                totalAmount: data.amount,
+                installmentAmount: data.installmentAmount || data.amount / data.totalInstallments,
+                totalInstallments: data.totalInstallments,
+                startDate: data.date,
+                category: data.category,
+                isActive: true,
+              });
+              addToast(
+                `Compra parcelada de ${data.totalInstallments}x de R$ ${(
+                  data.installmentAmount || data.amount / data.totalInstallments
+                ).toFixed(2)} cadastrada!`,
+                'success'
+              );
+            } else {
+              handleAddTransaction(data);
+            }
+          }}
+        />
+
+        {/* Alert preferences modal */}
+        <AlertPreferences
+          isOpen={alertPreferencesOpen}
+          onClose={() => setAlertPreferencesOpen(false)}
+          preferences={alertPreferences}
+          onChange={(updates) => setAlertPreferences((prev) => ({ ...prev, ...updates }))}
+        />
 
         <div className="p-3 pb-24 md:p-8 md:pb-8 w-full max-w-[1600px] mx-auto animate-fade-in-up delay-100">
           {renderContent()}
